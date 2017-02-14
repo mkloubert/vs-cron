@@ -1,0 +1,55 @@
+{
+  "name": "vs-cron",
+  "displayName": "Cron Jobs",
+  "description": "Extension that runs tasks periodically.",
+  "version": "0.0.1",
+  "publisher": "mkloubert",
+  "engines": {
+    "vscode": "^1.5.0"
+  },
+  "license": "MIT",
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "Tasks",
+    "Perodically",
+    "Run",
+    "Cron",
+    "Jobs"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/src/extension",
+  "contributes": {},
+  "scripts": {
+    "vscode:prepublish": "tsc -p ./",
+    "compile": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "node ./node_modules/vscode/bin/test"
+  },
+  "devDependencies": {
+    "typescript": "^2.0.3",
+    "vscode": "^1.0.0",
+    "mocha": "^2.3.3",
+    "@types/node": "^6.0.40",
+    "@types/mocha": "^2.2.32"
+  },
+  "icon": "icon.png",
+  "author": {
+    "name": "Marcel Joachim Kloubert"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mkloubert/vs-cron"
+  },
+  "bugs": {
+    "url": "https://github.com/mkloubert/vs-cron/issues"
+  },
+  "readmeFilename": "README.md",
+  "dependencies": {
+    "cron": "^1.2.1",
+    "moment": "^2.17.1"
+  }
+}
