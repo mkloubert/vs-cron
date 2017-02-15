@@ -95,3 +95,6 @@ Press `F1` to open the list of commands and enter one of the following commands:
 | `Cron Jobs: Stop all running jobs` | Stops all running jobs. | `extension.cronJons.stopRunningJobs` |
 | `Cron Jobs: Stop job` | Stops a specific job. | `extension.cronJons.stopJob` |
 
+## Documentation [[&uarr;](#table-of-contents)]
+
+The full API documentation can be found [here](https://mkloubert.github.io/vs-cron/).
