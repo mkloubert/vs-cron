@@ -126,6 +126,8 @@ The `action` property has the following format:
 ```json
 {
     "cron.jobs": {
+        "globals": "Marcel K! Marcel K! Marcel K!",
+    
         "jobs": [
             {
                 "name": "My Script",
@@ -174,8 +176,14 @@ exports.tick = function(args) {
     // access a module that is part of the extentsion
     // s. https://github.com/mkloubert/vs-cron/blob/master/package.json
     var moment = args.require('moment');
+    
+    // access the global data from the settings
+    // 
+    // from the example above this is: "Marcel K! Marcel K! Marcel K!"
+    var globals = args.globals;
 
     // access the data from the settings
+    // 
     // from the example above this is: "TM"
     var opts = args.options;
 
@@ -184,7 +192,7 @@ exports.tick = function(args) {
     var myState = args.state;  // 23979 at the beginning (s. settings above)
     args.state = new Date();
     // ... with other scripts of this type
-    args.globalState['myEndpoint'] = new Date();
+    args.globalState['myScript'] = new Date();
     
     // access permantent data storages
     // s. https://github.com/Microsoft/vscode/blob/master/src/vs/workbench/common/memento.ts
