@@ -228,6 +228,8 @@ You can return a number (sync execution), a [Promise](https://github.com/Microso
 
 Press `F1` to open the list of commands and enter one of the following commands:
 
+![Demo How to execute](https://raw.githubusercontent.com/mkloubert/vs-cron/master/demos/demo1.gif)
+
 | Name | Description | Command |
 | ---- | ---- | --------- |
 | `Cron Jobs: Restart all jobs` | Restarts all running jobs. | `extension.cronJons.restartRunningJobs` |
