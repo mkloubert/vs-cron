@@ -111,7 +111,7 @@ export interface Job {
      */
     name?: string;
     /**
-     * Indicates if this job can ran parallel to another or not.
+     * Indicates if this job can run parallel to another or not.
      */
     runParallel?: boolean;
     /**

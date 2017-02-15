@@ -1,5 +1,5 @@
 # Change Log (vs-cron)
 
-## [Unreleased]
+## 1.0.0 (February 15th, 2017; initial release)
 
-- Initial release
+* have a look at the [README](https://github.com/mkloubert/vs-cron/blob/master/README.md) to learn more
