@@ -23,6 +23,7 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+import * as Moment from 'moment';
 import * as vscode from 'vscode';
 
 
@@ -49,6 +50,13 @@ export interface Configuration {
  */
 export interface Job {
     /**
+     * [ONLY FOR INTERNAL USE]
+     * 
+     * Detail information for the GUI.
+     */
+    __detail?: string;
+
+    /**
      * The command / action to invoke.
      */
     action?: string | JobAction;
@@ -56,10 +64,6 @@ export interface Job {
      * Directly run on startup or not.
      */
     autoStart?: boolean;
-    /**
-     * The value to configure the job.
-     */
-    config?: string;
     /**
      * A description for the job.
      */
@@ -88,6 +92,10 @@ export interface Job {
      * The start delay in milliseconds.
      */
     startDelay?: number;
+    /**
+     * The time value that is used to configure the job.
+     */
+    time?: string;
     /**
      * The custom timezone to use.
      */
@@ -176,6 +184,94 @@ export type JobScriptModuleExecutorResult = Thenable<number> | number | void;
  * The arguments for a job tick.
  */
 export interface JobScriptModuleExecutorArguments extends ScriptArguments {
+    /**
+     * Activates the job.
+     * 
+     * @param {number} [delay] The delay in milliseconds.
+     * 
+     * @chainable
+     */
+    readonly activate: (delay?: number) => ScriptArguments;
+    /**
+     * Gets or sets the value that indicates to cache the underlying script or not.
+     */
+    cached: boolean;
+    /**
+     * Gets or sets the counter that indicates how often the job has been executed.
+     */
+    counter: number;
+    /**
+     * Deactivates the job.
+     * 
+     * @param {number} [delay] The delay in milliseconds.
+     * 
+     * @chainable
+     */
+    readonly deactivate: (delay?: number) => ScriptArguments;
+    /**
+     * Gets or sets the description for the underlying job.
+     */
+    description: string;
+    /**
+     * Gets or sets the detail information for the GUI.
+     */
+    detail: string;
+    /**
+     * Gets if the underlying job is active or not.
+     */
+    readonly isActive: boolean;
+    /**
+     * Gets if the underlying job is currently running or not.
+     */
+    readonly isRunning: boolean;
+    /**
+     * Gets or sets the maximum value that indicates how often the job can be executed.
+     */
+    maximum: number;
+    /**
+     * Gets or sets the minumum value that how many ticks have to been made before the job can be executed.
+     */
+    minimum: number;
+    /**
+     * Gets or sets the name of the underlying job.
+     */
+    name: string;
+    /**
+     * Gets or sets the value that indicates if this job can ran parallel to another or not.
+     */
+    runParallel: boolean;
+    /**
+     * Gets the script that is currently executed or sets it for the next execution.
+     */
+    script: string;
+    /**
+     * Starts the underlying job.
+     * 
+     * @param {number} [delay] The delay in milliseconds.
+     * 
+     * @return {Thenable<boolean>} The promise.
+     */
+    readonly start: (delay?: number) => Thenable<boolean>;
+    /**
+     * Stops the underlying job.
+     * 
+     * @param {number} [delay] The delay in milliseconds.
+     * 
+     * @return {Thenable<boolean>} The promise.
+     */
+    readonly stop: (delay?: number) => Thenable<boolean>;
+    /**
+     * Gets or sets the current timezone.
+     */
+    timeZone: string;
+    /**
+     * Gets or sets the value that indicates the minimum time the job can be executed.
+     */
+    validFrom: Moment.MomentInput;
+    /**
+     * Gets or sets the value that indicates the maximum time the job can be executed.
+     */
+    validUntil: Moment.MomentInput;
 }
 
 /**
@@ -217,10 +313,6 @@ export interface ScriptArguments {
      * Gets an object that stores data for all scripts.
      */
     readonly globalState: Object;
-    /**
-     * Gets if the underlying job is currently running or not.
-     */
-    readonly isRunning: boolean;
     /**
      * Logs a message.
      * 
@@ -272,22 +364,6 @@ export interface ScriptArguments {
      * @returns any The loaded module.
      */
     readonly require: (id: string) => any;
-    /**
-     * Starts the underlying job.
-     * 
-     * @param {number} [delay] The delay in milliseconds.
-     * 
-     * @return {Thenable<boolean>} The promise.
-     */
-    readonly start: (delay?: number) => Thenable<boolean>;
-    /**
-     * Stops the underlying job.
-     * 
-     * @param {number} [delay] The delay in milliseconds.
-     * 
-     * @return {Thenable<boolean>} The promise.
-     */
-    readonly stop: (delay?: number) => Thenable<boolean>;
     /**
      * Gets or sets a value for the script that is available while the current session.
      */

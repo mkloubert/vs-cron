@@ -109,8 +109,14 @@ export function configJobsToQuickPicks(jobs: cj_objects.ConfigJob | cj_objects.C
 
         let description = toStringSafe(x.config.description).trim();
 
+        let detail = toStringSafe(x.config.__detail);
+        if (isEmptyString(detail)) {
+            detail = undefined;
+        }
+
         return {
             description: description,
+            detail: detail,
             job: x,
             label: label,
         };

@@ -2,7 +2,7 @@
   "name": "vs-cron",
   "displayName": "Cron Jobs",
   "description": "Extension that runs tasks periodically.",
-  "version": "0.3.0",
+  "version": "0.5.0",
   "publisher": "mkloubert",
   "engines": {
     "vscode": "^1.5.0"
@@ -131,10 +131,6 @@
                       "type": "boolean",
                       "default": true
                     },
-                    "config": {
-                      "description": "The value to configure the job.",
-                      "type": "string"
-                    },
                     "description": {
                       "description": "A description for the job.",
                       "type": "string"
@@ -174,6 +170,10 @@
                       "description": "The start delay in milliseconds.",
                       "type": "integer",
                       "minimum": 0
+                    },
+                    "time": {
+                      "description": "The time value that is used to configure the job.",
+                      "type": "string"
                     },
                     "timeZone": {
                       "description": "The custom timezone to use.",
@@ -260,10 +260,6 @@
                         "type": "boolean",
                         "default": true
                       },
-                      "config": {
-                        "description": "The value to configure the job.",
-                        "type": "string"
-                      },
                       "description": {
                         "description": "A description for the job.",
                         "type": "string"
@@ -292,6 +288,10 @@
                         "description": "The start delay in milliseconds.",
                         "type": "integer",
                         "minimum": 0
+                      },
+                      "time": {
+                        "description": "The time value that is used to configure the job.",
+                        "type": "string"
                       },
                       "timeZone": {
                         "description": "The custom timezone to use.",

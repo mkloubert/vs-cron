@@ -173,14 +173,14 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
             switch (format) {
                 case '':
                 case 'crontab':
-                    cronTime = cj_helpers.toStringSafe(cfg.config);
+                    cronTime = cj_helpers.toStringSafe(cfg.time);
                     if (cj_helpers.isEmptyString(cronTime)) {
                         cronTime = '* * * * *';
                     }
                     break;
 
                 case 'date':
-                    cronTime = Moment(cfg.config).toDate();
+                    cronTime = Moment(cfg.time).toDate();
                     break;
             }
 
@@ -193,6 +193,32 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
             if (cj_helpers.isEmptyString(timeZone)) {
                 timeZone = undefined;
             }
+            
+            let validFrom: Moment.Moment;
+            if (!cj_helpers.isEmptyString(cfg.validFrom)) {
+                let vf = cj_helpers.toStringSafe(cfg.validFrom);
+
+                if (timeZone) {
+                    validFrom = momentTimeZone.tz(vf, timeZone);
+                }
+                else {
+                    validFrom = Moment(vf);
+                }
+            }
+
+            let validUntil: Moment.Moment;
+            if (!cj_helpers.isEmptyString(cfg.validUntil)) {
+                let vu = cj_helpers.toStringSafe(cfg.validUntil);
+
+                if (timeZone) {
+                    validUntil = momentTimeZone.tz(vu, timeZone);
+                }
+                else {
+                    validUntil = Moment(vu);
+                }
+            }
+
+            let runParallel = cj_helpers.toBooleanSafe(cfg.runParallel);
 
             let isExecuting = false;
             let action: () => void;
@@ -233,7 +259,9 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                     {
                         let jsa = <cj_contracts.JobScriptAction>jobAction;
 
+                        let doCacheScript = cj_helpers.toBooleanSafe(jsa.cached);
                         let scriptState = jsa.state;
+                        let scriptToExecute = jsa.script;
                         action = () => {
                             try {
                                 isExecuting = true;
@@ -256,23 +284,60 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                     }
                                 };
 
-                                let scriptModule = cj_helpers.loadModuleSync<cj_contracts.JobScriptModule>(jsa.script,
-                                                                                                           cj_helpers.toBooleanSafe(jsa.cached));
+                                let scriptModule: cj_contracts.JobScriptModule;
+                                if (!cj_helpers.isEmptyString(scriptToExecute)) {
+                                     scriptModule = cj_helpers.loadModuleSync<cj_contracts.JobScriptModule>(scriptToExecute, doCacheScript);
+                                }
+
                                 if (scriptModule) {
                                     let ticker = scriptModule.tick;
                                     if (ticker) {
                                         let tickerArgs: cj_contracts.JobScriptModuleExecutorArguments = {
+                                            activate: function(delay?) {
+                                                delay = parseInt(cj_helpers.toStringSafe(delay).trim());
+                                                if (isNaN(delay)) {
+                                                    isActive = true;
+                                                }
+                                                else {
+                                                    setTimeout(() => {
+                                                        isActive = true;
+                                                    }, delay);
+                                                }
+
+                                                return this;
+                                            },
+                                            cached: undefined,
+                                            counter: undefined,
+                                            deactivate: function(delay?) {
+                                                delay = parseInt(cj_helpers.toStringSafe(delay).trim());
+                                                if (isNaN(delay)) {
+                                                    isActive = false;
+                                                }
+                                                else {
+                                                    setTimeout(() => {
+                                                        isActive = false;
+                                                    }, delay);
+                                                }
+
+                                                return this;
+                                            },
+                                            description: undefined,
+                                            detail: undefined,
                                             emit: function() {
                                                 return me.emit
                                                          .apply(me, arguments);
                                             },
                                             globals: me.controller.getGlobals(),
                                             globalState: undefined,
+                                            isActive: undefined,
                                             isRunning: undefined,
                                             log: function(msg) {
                                                 me.controller.log(msg);
                                                 return this;
                                             },
+                                            maximum: undefined,
+                                            minimum: undefined,
+                                            name: undefined,
                                             on: function() {
                                                 me.on.apply(me, arguments);
                                                 return this;
@@ -290,6 +355,8 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                             require: function(id) {
                                                 return cj_helpers.requireModule(id);
                                             },
+                                            runParallel: undefined,
+                                            script: undefined,
                                             start: function(delay?) {
                                                 delay = parseInt(cj_helpers.toStringSafe(delay).trim());
 
@@ -344,13 +411,68 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                                 });
                                             },
                                             state: undefined,
+                                            timeZone: undefined,
+                                            validFrom: undefined,
+                                            validUntil: undefined,
                                         };
+
+                                        // tickerArgs.cached
+                                        Object.defineProperty(tickerArgs, 'cached', {
+                                            enumerable: true,
+                                            get: () => {
+                                                return doCacheScript;
+                                            },
+                                            set: (newValue) => {
+                                                doCacheScript = cj_helpers.toBooleanSafe(newValue);
+                                            }
+                                        });
+
+                                        // tickerArgs.counter
+                                        Object.defineProperty(tickerArgs, 'counter', {
+                                            enumerable: true,
+                                            get: () => {
+                                                return counter;
+                                            },
+                                            set: (newValue) => {
+                                                counter = parseInt(cj_helpers.toStringSafe(newValue).trim());
+                                            }
+                                        });
+
+                                        // tickerArgs.description
+                                        Object.defineProperty(tickerArgs, 'description', {
+                                            enumerable: true,
+                                            get: () => {
+                                                return me.config.description;
+                                            },
+                                            set: (newValue) => {
+                                                me.config.description = cj_helpers.toStringSafe(newValue);
+                                            }
+                                        });
+
+                                        // tickerArgs.detail
+                                        Object.defineProperty(tickerArgs, 'detail', {
+                                            enumerable: true,
+                                            get: () => {
+                                                return me.config.__detail;
+                                            },
+                                            set: (newValue) => {
+                                                me.config.__detail = cj_helpers.toStringSafe(newValue);
+                                            }
+                                        });
 
                                         // tickerArgs.globalState
                                         Object.defineProperty(tickerArgs, 'globalState', {
                                             enumerable: true,
                                             get: () => {
                                                 return me.controller.globalScriptStates;
+                                            }
+                                        });
+
+                                        // tickerArgs.isActive
+                                        Object.defineProperty(tickerArgs, 'isActive', {
+                                            enumerable: true,
+                                            get: () => {
+                                                return isActive;
                                             }
                                         });
 
@@ -362,11 +484,66 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                             }
                                         });
 
+                                        // tickerArgs.maximum
+                                        Object.defineProperty(tickerArgs, 'maximum', {
+                                            enumerable: true,
+                                            get: () => {
+                                                return maximum;
+                                            },
+                                            set: (newValue) => {
+                                                maximum = parseInt(cj_helpers.toStringSafe(newValue).trim());
+                                            }
+                                        });
+
+                                        // tickerArgs.minimum
+                                        Object.defineProperty(tickerArgs, 'minimum', {
+                                            enumerable: true,
+                                            get: () => {
+                                                return minimum;
+                                            },
+                                            set: (newValue) => {
+                                                minimum = parseInt(cj_helpers.toStringSafe(newValue).trim());
+                                            }
+                                        });
+
+                                        // tickerArgs.name
+                                        Object.defineProperty(tickerArgs, 'name', {
+                                            enumerable: true,
+                                            get: () => {
+                                                return me.config.name;
+                                            },
+                                            set: (newValue) => {
+                                                me.config.name = cj_helpers.toStringSafe(newValue);
+                                            }
+                                        });
+
                                         // tickerArgs.outputChannel
                                         Object.defineProperty(tickerArgs, 'outputChannel', {
                                             enumerable: true,
                                             get: () => {
                                                 return me.controller.outputChannel;
+                                            }
+                                        });
+
+                                        // tickerArgs.runParallel
+                                        Object.defineProperty(tickerArgs, 'runParallel', {
+                                            enumerable: true,
+                                            get: () => {
+                                                return runParallel;
+                                            },
+                                            set: (newValue) => {
+                                                runParallel = cj_helpers.toBooleanSafe(newValue);
+                                            }
+                                        });
+
+                                        // tickerArgs.script
+                                        Object.defineProperty(tickerArgs, 'script', {
+                                            enumerable: true,
+                                            get: () => {
+                                                return scriptToExecute;
+                                            },
+                                            set: (newValue) => {
+                                                scriptToExecute = cj_helpers.toStringSafe(newValue);
                                             }
                                         });
 
@@ -378,6 +555,58 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                             },
                                             set: (newValue) => {
                                                 scriptState = newValue;
+                                            }
+                                        });
+
+                                        // tickerArgs.timeZone
+                                        Object.defineProperty(tickerArgs, 'timeZone', {
+                                            enumerable: true,
+                                            get: () => {
+                                                return timeZone;
+                                            },
+                                            set: (newValue) => {
+                                                newValue = cj_helpers.toStringSafe(newValue);
+                                                if (!newValue) {
+                                                    newValue = undefined;
+                                                }
+
+                                                timeZone = newValue;
+                                            }
+                                        });
+
+                                        // tickerArgs.validFrom
+                                        Object.defineProperty(tickerArgs, 'validFrom', {
+                                            enumerable: true,
+                                            get: () => {
+                                                return validFrom;
+                                            },
+                                            set: (newValue) => {
+                                                let nvf: Moment.Moment = newValue;
+                                                if (nvf) {
+                                                    if (!Moment.isMoment(nvf)) {
+                                                        nvf = Moment(newValue);
+                                                    }
+                                                }
+
+                                                validFrom = nvf;
+                                            }
+                                        });
+
+                                        // tickerArgs.validUntil
+                                        Object.defineProperty(tickerArgs, 'validUntil', {
+                                            enumerable: true,
+                                            get: () => {
+                                                return validUntil;
+                                            },
+                                            set: (newValue) => {
+                                                let nvu: Moment.Moment = newValue;
+                                                if (nvu) {
+                                                    if (!Moment.isMoment(nvu)) {
+                                                        nvu = Moment(newValue);
+                                                    }
+                                                }
+
+                                                validUntil = nvu;
                                             }
                                         });
 
@@ -444,30 +673,6 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                 }
             });
 
-            let validFrom: Moment.Moment;
-            if (!cj_helpers.isEmptyString(cfg.validFrom)) {
-                let vf = cj_helpers.toStringSafe(cfg.validFrom);
-
-                if (timeZone) {
-                    validFrom = momentTimeZone.tz(vf, timeZone);
-                }
-                else {
-                    validFrom = Moment(vf);
-                }
-            }
-
-            let validUntil: Moment.Moment;
-            if (!cj_helpers.isEmptyString(cfg.validUntil)) {
-                let vu = cj_helpers.toStringSafe(cfg.validUntil);
-
-                if (timeZone) {
-                    validUntil = momentTimeZone.tz(vu, timeZone);
-                }
-                else {
-                    validUntil = Moment(vu);
-                }
-            }
-
             let isValid = (): boolean => {
                 let now = Moment();
 
@@ -506,7 +711,7 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                         }
 
                         if (isExecuting) {
-                            if (!cj_helpers.toBooleanSafe(cfg.runParallel)) {
+                            if (!runParallel) {
                                 // do not run while
                                 // this job is executing
                                 return;
