@@ -80,7 +80,7 @@ Add a `cron.jobs` section:
 
 | Name | Description |
 | ---- | --------- |
-| `action` | The action to define. Default: `crontab` |
+| `action` | The [action](#actions-) to define. |
 | `autoStart` | Run on startup or not. Default: `(false)` |
 | `description` | The description for the job. |
 | `format` | The format to use. Can be `crontab` or `date`. Default: `crontab` |
@@ -206,8 +206,8 @@ exports.tick = function(args) {
     
     // access permantent data storages
     // s. https://github.com/Microsoft/vscode/blob/master/src/vs/workbench/common/memento.ts
-    args.appState.update('myValue');  // app wide
-    args.workspaceState.update('myValue');  // workspace wide
+    let myAppWideValue = args.appState.update('myValue');  // app wide
+    args.workspaceState.update('myValue', 'New workspace wide value');  // workspace wide
     
     // registers for a one-time event
     args.once('myEvent', function(v) {
