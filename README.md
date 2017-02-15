@@ -80,6 +80,7 @@ Add a `cron.jobs` section:
 
 | Name | Description |
 | ---- | --------- |
+| `action` | The action to define. Default: `crontab` |
 | `autoStart` | Run on startup or not. Default: `(false)` |
 | `description` | The description for the job. |
 | `format` | The format to use. Can be `crontab` or `date`. Default: `crontab` |
@@ -93,7 +94,16 @@ Add a `cron.jobs` section:
 | `validFrom` | Defines the minumum time the job can be executed. |
 | `validUntil` | Defines the maximum time the job can be executed. |
 
-##### Commands [[&uarr;](#commands-)]
+##### Actions [[&uarr;](#jobs-)]
+
+The `action` can be a string, for executing a command, or an object with a `type` property:
+
+| Value | Description |
+| ---- | --------- |
+| `command` | Execute a [command](#commands-). |
+| `script` | Execute a [script](#scripts-). |
+
+###### Commands [[&uarr;](#actions-)]
 
 ```json
 {
@@ -121,7 +131,7 @@ The `action` property has the following format:
 | `arguments` | Optional / required arguments for the command. |
 | `command` | The ID of the command to execute. |
 
-##### Scripts [[&uarr;](#scripts-)]
+###### Scripts [[&uarr;](#actions-)]
 
 ```json
 {
