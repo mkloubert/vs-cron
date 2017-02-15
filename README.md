@@ -14,6 +14,7 @@
      * [Jobs](#jobs-)
        * [Commands](#commands-)
        * [Scripts](#scripts-)
+   * [Commands](#commands-1)
 3. [Documentation](#documentation-)
 
 ## Install [[&uarr;](#table-of-contents)]
@@ -77,3 +78,4 @@ Add a `cron.jobs` section:
 }
 ```
 
+### Commands [[&uarr;](#how-to-use-)]
