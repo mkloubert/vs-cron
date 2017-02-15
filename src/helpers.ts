@@ -24,6 +24,7 @@
 // DEALINGS IN THE SOFTWARE.
 
 import * as cj_contracts from './contracts';
+import * as cj_objects from './objects';
 import * as FS from 'fs';
 import * as Moment from 'moment';
 import * as Path from 'path';
@@ -66,6 +67,54 @@ export function cloneObject<T>(val: T): T {
     }
 
     return JSON.parse(JSON.stringify(val));
+}
+
+/**
+ * Compares two values for a sort operation.
+ * 
+ * @param {T} x The left value.
+ * @param {T} y The right value.
+ * 
+ * @return {number} The "sort value".
+ */
+export function compareValues<T>(x: T, y: T): number {
+    if (x === y) {
+        return 0;
+    }
+
+    if (x > y) {
+        return 1;
+    }
+
+    if (x < y) {
+        return -1;
+    }
+
+    return 0;
+}
+
+/**
+ * Converts config jobs to quick pick items.
+ * 
+ * @param {cj_objects.ConfigJob|cj_objects.ConfigJob[]} jobs The jobs to convert.
+ * 
+ * @returns {cj_objects.ConfigJobQuickPickItem[]} The quick pick items.
+ */
+export function configJobsToQuickPicks(jobs: cj_objects.ConfigJob | cj_objects.ConfigJob[]): cj_objects.ConfigJobQuickPickItem[] {
+    return asArray(jobs).filter(x => x).map((x, i) => {
+        let label = toStringSafe(x.config.name).trim();
+        if (!label) {
+            label = `Cron Job #${i + 1}`;
+        }
+
+        let description = toStringSafe(x.config.description).trim();
+
+        return {
+            description: description,
+            job: x,
+            label: label,
+        };
+    });
 }
 
 /**

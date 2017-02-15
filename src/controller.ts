@@ -28,6 +28,7 @@
 import * as cj_contracts from './contracts';
 import * as cj_helpers from './helpers';
 import * as cj_objects from './objects';
+import * as Moment from 'moment';
 import * as vscode from 'vscode';
 
 
@@ -110,6 +111,22 @@ export class Controller implements vscode.Disposable {
     }
 
     /**
+     * Logs a message.
+     * 
+     * @param {any} msg The message to log.
+     * 
+     * @chainable
+     */
+    public log(msg: any): Controller {
+        let now = Moment();
+
+        this.outputChannel
+            .appendLine(`[${now.format('YYYY-MM-DD HH:mm:ss')}] ${cj_helpers.toStringSafe(msg)}`);
+
+        return this;
+    }
+
+    /**
      * Is invoked after extension has been activated.
      */
     public onActivated() {
@@ -173,7 +190,7 @@ export class Controller implements vscode.Disposable {
             cj_helpers.tryDispose(x);
         });
 
-        let newJobList = [];
+        let newJobList: cj_objects.ConfigJob[] = [];
 
         let cfg = me.config;
         me._globalScriptStates = {};
@@ -185,15 +202,192 @@ export class Controller implements vscode.Disposable {
             let newJob = new cj_objects.ConfigJob(x, me);
             newJobList.push(newJob);
 
-            if (cj_helpers.toBooleanSafe(x.autoStart, true)) {
+            if (cj_helpers.toBooleanSafe(x.autoStart)) {
                 newJob.start().then(() => {
-
                 }, (err) => {
-                    //TODO: log
+                    me.log(`[ERROR] Controller.reloadJobs(): ${cj_helpers.toStringSafe(err)}`);
                 });
             }
         });
 
-        this._jobs = newJobList;
+        me._jobs = newJobList;
+    }
+
+    /**
+     * Starts a specific job.
+     * 
+     * @returns {Thenable<false|cj_objects.ConfigJobQuickPickItem>} The promise. 
+     */
+    public startJob(): Thenable<false | cj_objects.ConfigJobQuickPickItem> {
+        let me = this;
+
+        return new Promise<false | cj_objects.ConfigJobQuickPickItem>((resolve, reject) => {
+            let completed = cj_helpers.createSimplePromiseCompletedAction(resolve, reject);
+
+            try {
+                let quickPicks = cj_helpers.configJobsToQuickPicks(me._jobs
+                                                                     .filter(x => x && !x.isRunning));
+                quickPicks.sort((x, y) => {
+                    return cj_helpers.compareValues(cj_helpers.normalizeString(x.label),
+                                                    cj_helpers.normalizeString(x.label));
+                });
+                                           
+                if (quickPicks.length > 0) {
+                    vscode.window.showQuickPick(quickPicks, {
+                        placeHolder: 'Select the job to start...',
+                    }).then(x => {
+                        if (x) {
+                            x.job.start().then(() => {
+                                let isRunning = x.job.isRunning;
+
+                                completed(null, x);
+                            }, (err) => {
+                                completed(err, x);
+                            });
+                        }
+                        else {
+                            completed(null);  // nothing selected
+                        }
+                    });
+                }
+                else {
+                    completed(null, false);  // no items available
+                }
+            }
+            catch (e) {
+                completed(e);
+            }
+        });
+    }
+
+    /**
+     * Starts all non-running jobs.
+     * 
+     * @returns {Thenable<cj_objects.ConfigJob[]>} The promise.
+     */
+    public startNoRunningJobs(): Thenable<cj_objects.ConfigJob[]> {
+        let me = this;
+        
+        return new Promise<cj_objects.ConfigJob[]>((resolve, reject) => {
+            let completed = cj_helpers.createSimplePromiseCompletedAction(resolve, reject);
+
+            try {
+                let startedJobs: cj_objects.ConfigJob[] = [];
+                let nonRunningJobs = me._jobs.filter(x => !x.isRunning);
+
+                let nextJob: () => void;
+                nextJob = () => {
+                    if (nonRunningJobs.length < 1) {
+                        completed(null, startedJobs);
+                        return;
+                    }
+
+                    let j = nonRunningJobs.shift();
+                    
+                    j.start().then((hasStarted) => {
+                        if (hasStarted) {
+                            startedJobs.push(j);
+                        }
+
+                        nextJob();
+                    }, (err) => {
+                        completed(err);
+                    });
+                };
+
+                nextJob();
+            }
+            catch (e) {
+                completed(e);
+            }
+        });
+    }
+
+    /**
+     * Stops a specific job.
+     * 
+     * @returns {Thenable<false|cj_objects.ConfigJobQuickPickItem>} The promise. 
+     */
+    public stopJob(): Thenable<false | cj_objects.ConfigJobQuickPickItem> {
+        let me = this;
+
+        return new Promise<false | cj_objects.ConfigJobQuickPickItem>((resolve, reject) => {
+            let completed = cj_helpers.createSimplePromiseCompletedAction(resolve, reject);
+
+            try {
+                let quickPicks = cj_helpers.configJobsToQuickPicks(me._jobs
+                                                                     .filter(x => x && x.isRunning));
+                quickPicks.sort((x, y) => {
+                    return cj_helpers.compareValues(cj_helpers.normalizeString(x.label),
+                                                    cj_helpers.normalizeString(x.label));
+                });
+                                           
+                if (quickPicks.length > 0) {
+                    vscode.window.showQuickPick(quickPicks, {
+                        placeHolder: 'Select the job to stop...',
+                    }).then(x => {
+                        if (x) {
+                            x.job.stop().then(() => {
+                                completed(null, x);
+                            }, (err) => {
+                                completed(err, x);
+                            });
+                        }
+                        else {
+                            completed(null);  // nothing selected
+                        }
+                    });
+                }
+                else {
+                    completed(null, false);  // no items available
+                }
+            }
+            catch (e) {
+                completed(e);
+            }
+        });
+    }
+
+    /**
+     * Stops all running jobs.
+     * 
+     * @returns {Thenable<cj_objects.ConfigJob[]>} The promise.
+     */
+    public stopRunningJobs(): Thenable<cj_objects.ConfigJob[]> {
+        let me = this;
+        
+        return new Promise<cj_objects.ConfigJob[]>((resolve, reject) => {
+            let completed = cj_helpers.createSimplePromiseCompletedAction(resolve, reject);
+
+            try {
+                let stoppedJobs: cj_objects.ConfigJob[] = [];
+                let runningJobs = me._jobs.filter(x => x.isRunning);
+
+                let nextJob: () => void;
+                nextJob = () => {
+                    if (runningJobs.length < 1) {
+                        completed(null, stoppedJobs);
+                        return;
+                    }
+
+                    let j = runningJobs.shift();
+                    
+                    j.stop().then((hasStopped) => {
+                        if (hasStopped) {
+                            stoppedJobs.push(j);
+                        }
+
+                        nextJob();
+                    }, (err) => {
+                        completed(err);
+                    });
+                };
+
+                nextJob();
+            }
+            catch (e) {
+                completed(e);
+            }
+        });
     }
 }

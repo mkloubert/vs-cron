@@ -2,7 +2,7 @@
   "name": "vs-cron",
   "displayName": "Cron Jobs",
   "description": "Extension that runs tasks periodically.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "mkloubert",
   "engines": {
     "vscode": "^1.5.0"
@@ -23,6 +23,28 @@
   ],
   "main": "./out/src/extension",
   "contributes": {
+    "commands": [
+      {
+        "command": "extension.cronJons.startJob",
+        "title": "Start job",
+        "category": "Cron Jobs"
+      },
+      {
+        "command": "extension.cronJons.startNoRunningJobs",
+        "title": "Starts all non-running jobs",
+        "category": "Cron Jobs"
+      },
+      {
+        "command": "extension.cronJons.stopJob",
+        "title": "Stop job",
+        "category": "Cron Jobs"
+      },
+      {
+        "command": "extension.cronJons.stopRunningJobs",
+        "title": "Stops all running jobs",
+        "category": "Cron Jobs"
+      }
+    ],
     "configuration": {
       "properties": {
         "cron.jobs": {
@@ -103,20 +125,59 @@
                       "description": "The value to configure the job.",
                       "type": "string"
                     },
+                    "description": {
+                      "description": "A description for the job.",
+                      "type": "string"
+                    },
                     "format": {
                       "oneOf": [
                         {
                           "description": "CronTab",
                           "type": "string",
                           "enum": [
-                            "crontab"  
+                            "crontab",
+                            "date"
                           ]
                         }
                       ]
                     },
+                    "maximum": {
+                      "description": "The maximum number of executions.",
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "minimum": {
+                      "description": "The minimum number of ticks before the job does its first action.",
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "name": {
+                      "description": "The (display) name of the job.",
+                      "type": "string"
+                    },
+                    "runParallel": {
+                      "description": "Indicates if this job can ran parallel to another or not.",
+                      "type": "boolean",
+                      "default": false
+                    },
+                    "startDelay": {
+                      "description": "The start delay in milliseconds.",
+                      "type": "integer",
+                      "minimum": 0
+                    },
                     "timeZone": {
                       "description": "The custom timezone to use.",
                       "type": "string"
+                    },
+                    "validFrom": {
+                      "description": "Defines the minumum time the job can be executed.",
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "validUntil": {
+                      "description": "Defines the maximum time the job can be executed.",
+                      "type": "string",
+                      "format": "date-time"
                     }
                   }
                 },
@@ -193,25 +254,57 @@
                         "description": "The value to configure the job.",
                         "type": "string"
                       },
+                      "description": {
+                        "description": "A description for the job.",
+                        "type": "string"
+                      },
                       "format": {
                         "oneOf": [
                           {
                             "description": "CronTab",
                             "type": "string",
                             "enum": [
-                              "crontab"  
+                              "crontab"
                             ]
                           }
                         ]
                       },
+                      "name": {
+                        "description": "The (display) name of the job.",
+                        "type": "string"
+                      },
+                      "runParallel": {
+                        "description": "Indicates if this job can ran parallel to another or not.",
+                        "type": "boolean",
+                        "default": false
+                      },
+                      "startDelay": {
+                        "description": "The start delay in milliseconds.",
+                        "type": "integer",
+                        "minimum": 0
+                      },
                       "timeZone": {
                         "description": "The custom timezone to use.",
                         "type": "string"
+                      },
+                      "validFrom": {
+                        "description": "Defines the minumum time the job can be executed.",
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "validUntil": {
+                        "description": "Defines the maximum time the job can be executed.",
+                        "type": "string",
+                        "format": "date-time"
                       }
                     }
                   }
                 }
               ]
+            },
+            "timeZone": {
+              "description": "The default timezone to use.",
+              "type": "string"
             }
           }
         }
@@ -245,6 +338,7 @@
   "readmeFilename": "README.md",
   "dependencies": {
     "cron": "^1.2.1",
-    "moment": "^2.17.1"
+    "moment": "^2.17.1",
+    "moment-timezone": "^0.5.11"
   }
 }

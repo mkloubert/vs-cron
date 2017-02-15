@@ -68,8 +68,102 @@ export function activate(context: vscode.ExtensionContext) {
 
     controller = new cj_controller.Controller(context, outputChannel, pkgFile);
 
+    let showPopupMessage = (popupMsg: string, popupAction: (m: string) => Thenable<string>) => {
+        popupMsg = cj_helpers.toStringSafe(popupMsg).trim();
+
+        outputChannel.appendLine(popupMsg);
+        popupAction(`[vs-cron] ${popupMsg}`).then(() => {
+            //TODO
+        }, (err) => {
+            cj_helpers.log(`[ERROR] extension.activate().showPopupMessage(): ${cj_helpers.toStringSafe(err)}`);
+        });
+    };
+
+    // starta job
+    let startJob = vscode.commands.registerCommand('extension.cronJons.startJob', () => {
+        controller.startJob().then((selectedJob) => {
+            if (false === selectedJob) {
+                showPopupMessage('There is no job that can be STARTED.',
+                                 vscode.window.showWarningMessage);
+            }
+            else if (selectedJob) {
+                showPopupMessage(`Job '${selectedJob.label}' has been STARTED.`,
+                                 vscode.window.showInformationMessage);
+            }
+        }, (err) => {
+            showPopupMessage(`Could not START job: ${cj_helpers.toStringSafe(err)}`,
+                             vscode.window.showErrorMessage);
+        });
+    });
+
+    // start non running jobs
+    let startNoRunning = vscode.commands.registerCommand('extension.cronJons.startNoRunningJobs', () => {
+        controller.startNoRunningJobs().then((startedJobs) => {
+            let popupMsg: string;
+            if (startedJobs.length < 1) {
+                popupMsg = 'NO job has been STARTED.';
+            }
+            else if (1 == startedJobs.length) {
+                popupMsg = 'One job has been STARTED.';
+            }
+            else {
+                popupMsg = `${startedJobs.length} jobs have been STARTED.`;
+            }
+
+            showPopupMessage(popupMsg,
+                             vscode.window.showInformationMessage);
+        }, (err) => {
+            showPopupMessage(`Could not START NON-RUNNING jobs: ${cj_helpers.toStringSafe(err)}`,
+                             vscode.window.showErrorMessage);
+        });
+    });
+
+    // stops a job
+    let stopJob = vscode.commands.registerCommand('extension.cronJons.stopJob', () => {
+        controller.stopJob().then((selectedJob) => {
+            if (false === selectedJob) {
+                showPopupMessage('There is no job that can be STOPPED.',
+                                 vscode.window.showWarningMessage);
+            }
+            else if (selectedJob) {
+                showPopupMessage(`Job '${selectedJob.label}' has been STOPPED.`,
+                                 vscode.window.showInformationMessage);
+            }
+        }, (err) => {
+            showPopupMessage(`Could not STOP job: ${cj_helpers.toStringSafe(err)}`,
+                             vscode.window.showErrorMessage);
+        });
+    });
+
+    // stop all running jobs
+    let stopNoRunning = vscode.commands.registerCommand('extension.cronJons.stopRunningJobs', () => {
+        controller.stopRunningJobs().then((stoppedJobs) => {
+            let popupMsg: string;
+            if (stoppedJobs.length < 1) {
+                popupMsg = 'NO job has been STOPPED.';
+            }
+            else if (1 == stoppedJobs.length) {
+                popupMsg = 'One job has been STOPPED.';
+            }
+            else {
+                popupMsg = `${stoppedJobs.length} jobs have been STOPPED.`;
+            }
+
+            showPopupMessage(popupMsg,
+                             vscode.window.showInformationMessage);
+        }, (err) => {
+            showPopupMessage(`Could not STOP RUNNING jobs: ${cj_helpers.toStringSafe(err)}`,
+                             vscode.window.showErrorMessage);
+        });
+    });
+
     context.subscriptions
            .push(controller);
+
+    // commands
+    context.subscriptions
+           .push(startJob, startNoRunning,
+                 stopJob, stopNoRunning);
 
     // notfiy setting changes
     context.subscriptions

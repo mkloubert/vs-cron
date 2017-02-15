@@ -23,6 +23,8 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+import * as vscode from 'vscode';
+
 
 /**
  * App settings
@@ -36,6 +38,10 @@ export interface Configuration {
      * One or more job to configure.
      */
     jobs?: Job | Job[];
+    /**
+     * The default timezone to use.
+     */
+    timeZone?: string;
 }
 
 /**
@@ -55,19 +61,54 @@ export interface Job {
      */
     config?: string;
     /**
+     * A description for the job.
+     */
+    description?: string;
+    /**
      * Format.
      */
     format?: string;
     /**
+     * The maximum number of executions.
+     */
+    maximum?: number;
+    /**
+     * The minimum number of ticks before the job does its first action.
+     */
+    minimum?: number;
+    /**
+     * The (display) name of the job.
+     */
+    name?: string;
+    /**
+     * Indicates if this job can ran parallel to another or not.
+     */
+    runParallel?: boolean;
+    /**
+     * The start delay in milliseconds.
+     */
+    startDelay?: number;
+    /**
      * The custom timezone to use.
      */
     timeZone?: string;
+    /**
+     * Defines the minumum time the job can be executed.
+     */
+    validFrom?: string;
+    /**
+     * Defines the maximum time the job can be executed.
+     */
+    validUntil?: string;
 }
 
 /**
  * A job action.
  */
 export interface JobAction {
+    /**
+     * Type of the action.
+     */
     type?: string;
 }
 
@@ -172,9 +213,21 @@ export interface ScriptArguments {
      */
     readonly isRunning: boolean;
     /**
+     * Logs a message.
+     * 
+     * @param {any} msg The message to log.
+     * 
+     * @chainable
+     */
+    readonly log: (msg: any) => ScriptArguments;
+    /**
      * Additional / optional data for the execution.
      */
     readonly options: any;
+    /**
+     * Gets the output channel the script can use.
+     */
+    readonly outputChannel: vscode.OutputChannel;
     /**
      * Loads a module from the script context.
      * 
