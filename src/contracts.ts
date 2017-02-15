@@ -193,6 +193,10 @@ export interface JobScriptModuleExecutorArguments extends ScriptArguments {
      */
     readonly activate: (delay?: number) => ScriptArguments;
     /**
+     * Gets the extension's Memento for accessing app wide data.
+     */
+    readonly appState: vscode.Memento;
+    /**
      * Gets or sets the value that indicates to cache the underlying script or not.
      */
     cached: boolean;
@@ -237,6 +241,10 @@ export interface JobScriptModuleExecutorArguments extends ScriptArguments {
      */
     name: string;
     /**
+     * The package file with the information about this extension.
+     */
+    readonly packageFile: PackageFile;
+    /**
      * Gets or sets the value that indicates if this job can ran parallel to another or not.
      */
     runParallel: boolean;
@@ -261,6 +269,10 @@ export interface JobScriptModuleExecutorArguments extends ScriptArguments {
      */
     readonly stop: (delay?: number) => Thenable<boolean>;
     /**
+     * Gets the array to which disposables can be added for this extension.
+     */
+    readonly subscriptions: { dispose(): any }[];
+    /**
      * Gets or sets the current timezone.
      */
     timeZone: string;
@@ -272,6 +284,10 @@ export interface JobScriptModuleExecutorArguments extends ScriptArguments {
      * Gets or sets the value that indicates the maximum time the job can be executed.
      */
     validUntil: Moment.MomentInput;
+    /**
+     * Gets the extension's Memento for accessing workspace wide data.
+     */
+    readonly workspaceState: vscode.Memento;
 }
 
 /**

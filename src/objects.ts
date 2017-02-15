@@ -306,6 +306,7 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
 
                                                 return this;
                                             },
+                                            appState: undefined,
                                             cached: undefined,
                                             counter: undefined,
                                             deactivate: function(delay?) {
@@ -348,6 +349,7 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                             },
                                             options: jsa.options,
                                             outputChannel: undefined,
+                                            packageFile: cj_helpers.cloneObject(me.controller.packageFile),
                                             removeListener: function() {
                                                 me.removeListener.apply(me, arguments);
                                                 return this;
@@ -411,10 +413,20 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                                 });
                                             },
                                             state: undefined,
+                                            subscriptions: undefined,
                                             timeZone: undefined,
                                             validFrom: undefined,
                                             validUntil: undefined,
+                                            workspaceState: undefined,
                                         };
+
+                                        // tickerArgs.appState
+                                        Object.defineProperty(tickerArgs, 'appState', {
+                                            enumerable: true,
+                                            get: () => {
+                                                return me.controller.context.globalState;
+                                            }
+                                        });
 
                                         // tickerArgs.cached
                                         Object.defineProperty(tickerArgs, 'cached', {
@@ -558,6 +570,14 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                             }
                                         });
 
+                                        // tickerArgs.subscriptions
+                                        Object.defineProperty(tickerArgs, 'subscriptions', {
+                                            enumerable: true,
+                                            get: () => {
+                                                return me.controller.context.subscriptions;
+                                            }
+                                        });
+
                                         // tickerArgs.timeZone
                                         Object.defineProperty(tickerArgs, 'timeZone', {
                                             enumerable: true,
@@ -607,6 +627,14 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                                 }
 
                                                 validUntil = nvu;
+                                            }
+                                        });
+
+                                        // tickerArgs.workspaceState
+                                        Object.defineProperty(tickerArgs, 'workspaceState', {
+                                            enumerable: true,
+                                            get: () => {
+                                                return me.controller.context.workspaceState;
                                             }
                                         });
 
