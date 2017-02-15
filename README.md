@@ -153,7 +153,7 @@ The `action` property has the following format:
 | `script` | The path to the script to execute. |
 | `state` | The initial state value for the script. |
 
-The script should look like this:
+The `./my-cron-script.js` script file should look like this:
 
 ```javascript
 exports.tick = function(args) {
