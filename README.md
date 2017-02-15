@@ -56,9 +56,9 @@ Add a `cron.jobs` section:
         "jobs": [
             {
                 "name": "My AutoSave using CronTab format",
-                "description": "Saves all opened files all 5 minutes.",
+                "description": "Saves all opened files all 30 seconds.",
                 
-                "time": "*/5 * * * *",
+                "time": "*/30 * * * * *",
                 "action": "workbench.action.files.saveAll"
             },
             
@@ -77,6 +77,21 @@ Add a `cron.jobs` section:
     }
 }
 ```
+
+| Name | Description |
+| ---- | --------- |
+| `autoStart` | Run on startup or not. Default: `(false)` |
+| `description` | The description for the job. |
+| `format` | The format to use. Can be `crontab` or `date`. Default: `crontab` |
+| `maximum` | The maximum number of executions. |
+| `minimum` | The minimum number of ticks before the job does its first action. |
+| `name` | The (display) name of the job. |
+| `runParallel` | Indicates if this job can be run parallel to another or not. Default: `(false)` |
+| `startDelay` | The start delay in milliseconds. |
+| `time` | The time value that is used to configure the job. For `crontab` format, s. [cron module](https://www.npmjs.com/package/cron) |
+| `timeZone` | The custom timezone to use. |
+| `validFrom` | Defines the minumum time the job can be executed. |
+| `validUntil` | Defines the maximum time the job can be executed. |
 
 ##### Commands [[&uarr;](#commands-)]
 
