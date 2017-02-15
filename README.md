@@ -95,7 +95,44 @@ Add a `cron.jobs` section:
 
 ##### Commands [[&uarr;](#commands-)]
 
+```json
+{
+    "cron.jobs": {
+        "jobs": [
+            {
+                "name": "My AutoSave",
+                "description": "Saves all opened files all 5 minutes.",
+                
+                "time": "*/5 * * * *",
+                "action": {
+                    "type": "command",
+                    "command": "workbench.action.files.saveAll"
+                }
+            }
+        ]
+    }
+}
+```
+
 ##### Scripts [[&uarr;](#scripts-)]
+
+```json
+{
+    "cron.jobs": {
+        "jobs": [
+            {
+                "name": "My Script",
+                "description": "Runs a script every minute.",
+
+                "action": {
+                    "type": "script",
+                    "script": "./my-cron-script.js"
+                }
+            }
+        ]
+    }
+}
+```
 
 ### Commands [[&uarr;](#how-to-use-)]
 
