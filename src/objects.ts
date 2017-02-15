@@ -782,11 +782,11 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                 timeZone: timeZone,
             });
 
-            newScheduler.start();
-
             startedActions.forEach(x => {
                 x();
             });
+
+            newScheduler.start();
 
             me._scheduler = newScheduler;
 
