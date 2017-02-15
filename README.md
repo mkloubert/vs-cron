@@ -78,4 +78,8 @@ Add a `cron.jobs` section:
 }
 ```
 
+##### Commands [[&uarr;](#commands-)]
+
+##### Scripts [[&uarr;](#scripts-)]
+
 ### Commands [[&uarr;](#how-to-use-)]
