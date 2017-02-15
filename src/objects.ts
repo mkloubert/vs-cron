@@ -693,14 +693,15 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
 
             
             // start delay
+            let isOnDelay = false;
             startedActions.push(() => {
                 let startDelay = parseInt(cj_helpers.toStringSafe(cfg.startDelay));
                 
                 if (!isNaN(startDelay)) {
-                    isActive = false;
+                    isOnDelay = true;
 
                     setTimeout(() => {
-                        isActive = true;
+                        isOnDelay = false;
                     }, startDelay);
                 }
             });
@@ -734,6 +735,10 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                 cronTime: cronTime,
                 onTick: () => {
                     try {
+                        if (isOnDelay) {
+                            return;  // start delay
+                        }
+
                         if (!isActive) {
                             return;  // no active
                         }
