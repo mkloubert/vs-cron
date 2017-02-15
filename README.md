@@ -13,8 +13,8 @@
    * [Settings](#settings-)
      * [Jobs](#jobs-)
        * [Commands](#commands-)
-       * [Scripts](#scripts-)
-   * [Commands](#commands-1)
+        * [Scripts](#scripts-)
+   * [Commands](#commands--1)
 3. [Documentation](#documentation-)
 
 ## Install [[&uarr;](#table-of-contents)]
@@ -83,3 +83,15 @@ Add a `cron.jobs` section:
 ##### Scripts [[&uarr;](#scripts-)]
 
 ### Commands [[&uarr;](#how-to-use-)]
+
+Press `F1` to open the list of commands and enter one of the following commands:
+
+| Name | Description | Command |
+| ---- | ---- | --------- |
+| `Cron Jobs: Restart all jobs` | Restarts all running jobs. | `extension.cronJons.restartRunningJobs` |
+| `Cron Jobs: Restart job` | Restarts a specific job. | `extension.cronJons.restartJob` |
+| `Cron Jobs: Start job` | Starts a specific job. | `extension.cronJons.startJob` |
+| `Cron Jobs: Start all jobs` | Starts all non-running jobs. | `extension.cronJons.startNoRunningJobs` |
+| `Cron Jobs: Stop all running jobs` | Stops all running jobs. | `extension.cronJons.stopRunningJobs` |
+| `Cron Jobs: Stop job` | Stops a specific job. | `extension.cronJons.stopJob` |
+
