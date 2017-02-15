@@ -2,7 +2,7 @@
   "name": "vs-cron",
   "displayName": "Cron Jobs",
   "description": "Extension that runs tasks periodically.",
-  "version": "0.6.0",
+  "version": "1.0.0",
   "publisher": "mkloubert",
   "engines": {
     "vscode": "^1.5.0"
@@ -26,12 +26,12 @@
     "commands": [
       {
         "command": "extension.cronJons.restartRunningJobs",
-        "title": "Restarts all running jobs",
+        "title": "Restart all jobs",
         "category": "Cron Jobs"
       },
       {
         "command": "extension.cronJons.restartJob",
-        "title": "Restart a job",
+        "title": "Restart job",
         "category": "Cron Jobs"
       },
       {
@@ -41,7 +41,7 @@
       },
       {
         "command": "extension.cronJons.startNoRunningJobs",
-        "title": "Starts all non-running jobs",
+        "title": "Start all jobs",
         "category": "Cron Jobs"
       },
       {
@@ -51,7 +51,7 @@
       },
       {
         "command": "extension.cronJons.stopRunningJobs",
-        "title": "Stops all running jobs",
+        "title": "Stop all jobs",
         "category": "Cron Jobs"
       }
     ],

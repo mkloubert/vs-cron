@@ -347,6 +347,10 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                                 me.once.apply(me, arguments);
                                                 return this;
                                             },
+                                            openHtml: (html, title, docId) => {
+                                                return cj_helpers.openHtmlDocument(me.controller.htmlDocuments,
+                                                                                   html, title, docId);
+                                            },
                                             options: jsa.options,
                                             outputChannel: undefined,
                                             packageFile: cj_helpers.cloneObject(me.controller.packageFile),

@@ -25,6 +25,7 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+import * as cj_content from './content';
 import * as cj_controller from './controller';
 import * as cj_contracts from './contracts';
 import * as cj_helpers from './helpers';
@@ -77,6 +78,32 @@ export function activate(context: vscode.ExtensionContext) {
             cj_helpers.log(`[ERROR] extension.activate().showPopupMessage(): ${cj_helpers.toStringSafe(err)}`);
         });
     };
+
+    // open HTML document
+    let openHtmlDoc = vscode.commands.registerCommand('extension.cronJons.openHtmlDoc', (doc: cj_contracts.Document) => {
+        try {
+            let htmlDocs = controller.htmlDocuments;
+
+            let url = vscode.Uri.parse(`vs-cron-html://authority/?id=${encodeURIComponent(cj_helpers.toStringSafe(doc.id))}` + 
+                                       `&x=${encodeURIComponent(cj_helpers.toStringSafe(new Date().getTime()))}`);
+
+            let title = cj_helpers.toStringSafe(doc.title).trim();
+            if (!title) {
+                title = `[vs-cron] HTML document #${cj_helpers.toStringSafe(doc.id)}`;
+            }
+
+            vscode.commands.executeCommand('vscode.previewHtml', url, vscode.ViewColumn.One, title).then((success) => {
+                cj_helpers.removeDocuments(doc, htmlDocs);
+            }, (err) => {
+                cj_helpers.removeDocuments(doc, htmlDocs);
+
+                cj_helpers.log(`[ERROR] extension.cronJons.openHtmlDoc(2): ${err}`);
+            });
+        }
+        catch (e) {
+            cj_helpers.log(`[ERROR] extension.cronJons.openHtmlDoc(1): ${e}`);
+        }
+    });
 
     let restartRunning = vscode.commands.registerCommand('extension.cronJons.restartRunningJobs', () => {
         controller.restartRunningJobs().then((restartedJobs) => {
@@ -194,12 +221,22 @@ export function activate(context: vscode.ExtensionContext) {
         });
     });
 
+    let htmlViewer = vscode.workspace.registerTextDocumentContentProvider('vs-cron-html',
+                                                                          new cj_content.HtmlTextDocumentContentProvider(controller));
+
+
+    // controller
     context.subscriptions
            .push(controller);
 
+    // html viewer
+    context.subscriptions
+           .push(htmlViewer);
+
     // commands
     context.subscriptions
-           .push(startJob, startNoRunning,
+           .push(openHtmlDoc,
+                startJob, startNoRunning,
                  stopJob, stopNoRunning,
                  restartJob, restartRunning);
 

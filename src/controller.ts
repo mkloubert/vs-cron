@@ -49,6 +49,10 @@ export class Controller implements vscode.Disposable {
      */
     protected _globalScriptStates: Object;
     /**
+     * Stores HTML documents.
+     */
+    protected _htmlDocs: cj_contracts.Document[];
+    /**
      * The current list of running jobs.
      */
     protected _jobs: cj_objects.ConfigJob[];
@@ -108,6 +112,13 @@ export class Controller implements vscode.Disposable {
      */
     public get globalScriptStates(): Object {
         return this._globalScriptStates;
+    }
+
+    /**
+     * Gets the list of HTML documents.
+     */
+    public get htmlDocuments(): cj_contracts.Document[] {
+        return this._htmlDocs;
     }
 
     /**
@@ -173,6 +184,7 @@ export class Controller implements vscode.Disposable {
         let cfg = <cj_contracts.Configuration>vscode.workspace.getConfiguration("cron.jobs");
 
         this._config = cfg;
+        this._htmlDocs = [];
 
         this.reloadJobs();
     }

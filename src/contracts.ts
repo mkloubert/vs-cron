@@ -46,6 +46,32 @@ export interface Configuration {
 }
 
 /**
+ * A document.
+ */
+export interface Document {
+    /**
+     * The body / content of the document.
+     */
+    body: Buffer;
+    /**
+     * The encoding.
+     */
+    encoding?: string;
+    /**
+     * The ID.
+     */
+    id?: any;
+    /**
+     * The MIME type.
+     */
+    mime?: string;
+    /**
+     * The title.
+     */
+    title?: string;
+}
+
+/**
  * Settings for a job.
  */
 export interface Job {
@@ -355,6 +381,16 @@ export interface ScriptArguments {
      * @chainable
      */
     readonly once: (event: string | Symbol, listener: Function) => ScriptArguments;
+    /**
+     * Opens a HTML document in a new tab.
+     * 
+     * @param {string} html The HTML document (source code).
+     * @param {string} [title] The custom title for the tab.
+     * @param {any} [id] The custom ID for the document in the storage.
+     * 
+     * @returns {Thenable<any>} The promise.
+     */
+    readonly openHtml: (html: string, title?: string, id?: any) => Thenable<any>;
     /**
      * Additional / optional data for the execution.
      */

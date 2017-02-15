@@ -39,6 +39,8 @@ import * as vscode from 'vscode';
 export type SimpleCompletedAction<TResult> = (err?: any, result?: TResult) => void;
 
 
+let nextHtmlDocId = -1;
+
 /**
  * Returns a value as array.
  * 
@@ -148,6 +150,26 @@ export function createSimplePromiseCompletedAction<TResult>(resolve: (value?: TR
 }
 
 /**
+ * Returns the value from a "parameter" object.
+ * 
+ * @param {Object} params The object.
+ * @param {string} name The name of the parameter.
+ * 
+ * @return {string} The value of the parameter (if found).
+ */
+export function getUrlParam(params: Object, name: string): string {
+    if (params) {
+        name = normalizeString(name);
+
+        for (let p in params) {
+            if (normalizeString(p) == name) {
+                return toStringSafe(params[p]);
+            }
+        }
+    }
+}
+
+/**
  * Checks if the string representation of a value is empty
  * or contains whitespaces only.
  * 
@@ -211,6 +233,59 @@ export function log(msg: any) {
 }
 
 /**
+ * Opens a HTML document in a new tab for a document storage.
+ * 
+ * @param {cj_contracts.Document[]} storage The storage to open for.
+ * @param {string} html The HTML document (source code).
+ * @param {string} [title] The custom title for the tab.
+ * @param {any} [id] The custom ID for the document in the storage.
+ * 
+ * @returns {Thenable<any>} The promise.
+ */
+export function openHtmlDocument(storage: cj_contracts.Document[],
+                                 html: string, title?: string, id?: any): Thenable<any> {
+    return new Promise((resolve, reject) => {
+        let completed = createSimplePromiseCompletedAction(resolve, reject);
+
+        try {
+            let body: Buffer;
+            let enc = 'utf8';
+            if (html) {
+                body = new Buffer(toStringSafe(html), enc);
+            }
+
+            if (isNullOrUndefined(id)) {
+                id = 'vscjGlobalHtmlDocs::660e0c72-ef45-4305-b82c-fec885062295::' + (++nextHtmlDocId);
+            }
+
+            let doc: cj_contracts.Document = {
+                body: body,
+                encoding: enc,
+                id: id,
+                mime: 'text/html',
+            };
+
+            if (!isEmptyString(title)) {
+                doc.title = toStringSafe(title).trim();
+            }
+
+            if (storage) {
+                storage.push(doc);
+            }
+
+            vscode.commands.executeCommand('extension.cronJons.openHtmlDoc', doc).then((result: any) => {
+                completed(null, result);
+            }, (err) => {
+                completed(err);
+            });
+        }
+        catch (e) {
+            completed(e);
+        }
+    });
+}
+
+/**
  * Normalizes a value as string so that is comparable.
  * 
  * @param {any} val The value to convert.
@@ -224,6 +299,37 @@ export function normalizeString(val: any, normalizer?: (str: string) => string):
     }
 
     return normalizer(toStringSafe(val));
+}
+
+/**
+ * Removes documents from a storage.
+ * 
+ * @param {cj_contracts.Document|cj_contracts.Document[]} docs The document(s) to remove.
+ * @param {cj_contracts.Document[]} storage The storage.
+ * 
+ * @return {cj_contracts.Document[]} The removed documents.
+ */
+export function removeDocuments(docs: cj_contracts.Document | cj_contracts.Document[],
+                                storage: cj_contracts.Document[]): cj_contracts.Document[] {
+    let ids = asArray(docs).filter(x => x)
+                           .map(x => x.id);
+
+    let removed = [];
+
+    if (storage) {
+        for (let i = 0; i < storage.length; ) {
+            let d = storage[i];
+            if (ids.indexOf(d.id) > -1) {
+                removed.push(d);
+                storage.splice(i, 1);
+            }
+            else {
+                ++i;
+            }
+        }
+    }
+
+    return removed;
 }
 
 /**
@@ -293,4 +399,33 @@ export function tryDispose(obj: vscode.Disposable): boolean {
 
         return false;
     }
+}
+
+/**
+ * Extracts the query parameters of an URI to an object.
+ * 
+ * @param {vscode.Uri} uri The URI.
+ * 
+ * @return {Object} The parameters of the URI as object.
+ */
+export function uriParamsToObject(uri: vscode.Uri): Object {
+    if (!uri) {
+        return uri;
+    }
+
+    let params: any;
+    if (!isEmptyString(uri.query)) {
+        // s. https://css-tricks.com/snippets/jquery/get-query-params-object/
+        params = uri.query.replace(/(^\?)/,'')
+                          .split("&")
+                          .map(function(n) { return n = n.split("="), this[normalizeString(n[0])] =
+                                                                           toStringSafe(decodeURIComponent(n[1])), this}
+                          .bind({}))[0];
+    }
+
+    if (!params) {
+        params = {};
+    }
+
+    return params;
 }
