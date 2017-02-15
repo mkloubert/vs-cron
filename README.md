@@ -206,8 +206,8 @@ exports.tick = function(args) {
     
     // access permantent data storages
     // s. https://github.com/Microsoft/vscode/blob/master/src/vs/workbench/common/memento.ts
-    let myAppWideValue = args.appState.update('myValue');  // app wide
-    args.workspaceState.update('myValue', 'New workspace wide value');  // workspace wide
+    let myAppWideValue = args.appState.get('myAppValue');  // app wide
+    args.workspaceState.update('myWorkspaceValue', 'New workspace wide value');  // workspace wide
     
     // registers for a one-time event
     args.once('myEvent', function(v) {
