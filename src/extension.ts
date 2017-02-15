@@ -48,7 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
         cj_helpers.log(`[ERROR] extension.activate(): ${cj_helpers.toStringSafe(e)}`);
     }
 
-    let outputChannel = vscode.window.createOutputChannel("REST API");
+    let outputChannel = vscode.window.createOutputChannel("Cron Jobs");
 
     // show infos about the app
     {

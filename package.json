@@ -2,7 +2,7 @@
   "name": "vs-cron",
   "displayName": "Cron Jobs",
   "description": "Extension that runs tasks periodically.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "publisher": "mkloubert",
   "engines": {
     "vscode": "^1.5.0"
@@ -22,7 +22,202 @@
     "*"
   ],
   "main": "./out/src/extension",
-  "contributes": {},
+  "contributes": {
+    "configuration": {
+      "properties": {
+        "cron.jobs": {
+          "type": "object",
+          "properties": {
+            "globals": {
+              "description": "Data that is available everywhere, in scripts e.g."
+            },
+            "jobs": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "description": "The settings for the job.",
+                  "properties": {
+                    "action": {
+                      "oneOf": [
+                        {
+                          "description": "The command to execute.",
+                          "type": "string"
+                        },
+                        {
+                          "description": "Settings for the COMMAND to execute.",
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "description": "The type of the action.",
+                              "type": "string",
+                              "enum": [
+                                "command"
+                              ]
+                            },
+                            "arguments": {
+                              "description": "Additional arguments for the execution.",
+                              "type": "array"
+                            },
+                            "command": {
+                              "description": "The ID of the command.",
+                              "type": "string"
+                            }
+                          }
+                        },
+                        {
+                          "description": "Settings for the SCRIPT to execute.",
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "description": "The type of the action.",
+                              "type": "string",
+                              "enum": [
+                                "script"
+                              ]
+                            },
+                            "cached": {
+                              "description": "Store script (module) in cache or not.",
+                              "type": "boolean",
+                              "default": false
+                            },
+                            "options": {
+                              "description": "Optional data for the execution."
+                            },
+                            "script": {
+                              "description": "The path to the script.",
+                              "type": "string"
+                            },
+                            "state": {
+                              "description": "The initial state value for the script."
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "autoStart": {
+                      "description": "Directly run on startup or not.",
+                      "type": "boolean",
+                      "default": true
+                    },
+                    "config": {
+                      "description": "The value to configure the job.",
+                      "type": "string"
+                    },
+                    "format": {
+                      "oneOf": [
+                        {
+                          "description": "CronTab",
+                          "type": "string",
+                          "enum": [
+                            "crontab"  
+                          ]
+                        }
+                      ]
+                    },
+                    "timeZone": {
+                      "description": "The custom timezone to use.",
+                      "type": "string"
+                    }
+                  }
+                },
+                {
+                  "type": "array",
+                  "description": "One or more job to configure.",
+                  "items": {
+                    "type": "object",
+                    "description": "The settings for the job.",
+                    "properties": {
+                      "action": {
+                        "oneOf": [
+                          {
+                            "description": "The command to execute.",
+                            "type": "string"
+                          },
+                          {
+                            "description": "Settings for the COMMAND to execute.",
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "description": "The type of the action.",
+                                "type": "string",
+                                "enum": [
+                                  "command"
+                                ]
+                              },
+                              "arguments": {
+                                "description": "Additional arguments for the execution.",
+                                "type": "array"
+                              },
+                              "command": {
+                                "description": "The ID of the command.",
+                                "type": "string"
+                              }
+                            }
+                          },
+                          {
+                            "description": "Settings for the SCRIPT to execute.",
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "description": "The type of the action.",
+                                "type": "string",
+                                "enum": [
+                                  "script"
+                                ]
+                              },
+                              "cached": {
+                                "description": "Store script (module) in cache or not.",
+                                "type": "boolean",
+                                "default": false
+                              },
+                              "options": {
+                                "description": "Optional data for the execution."
+                              },
+                              "script": {
+                                "description": "The path to the script.",
+                                "type": "string"
+                              },
+                              "state": {
+                                "description": "The initial state value for the script."
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "autoStart": {
+                        "description": "Directly run on startup or not.",
+                        "type": "boolean",
+                        "default": true
+                      },
+                      "config": {
+                        "description": "The value to configure the job.",
+                        "type": "string"
+                      },
+                      "format": {
+                        "oneOf": [
+                          {
+                            "description": "CronTab",
+                            "type": "string",
+                            "enum": [
+                              "crontab"  
+                            ]
+                          }
+                        ]
+                      },
+                      "timeZone": {
+                        "description": "The custom timezone to use.",
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
     "compile": "tsc -watch -p ./",

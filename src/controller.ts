@@ -26,6 +26,8 @@
 // DEALINGS IN THE SOFTWARE.
 
 import * as cj_contracts from './contracts';
+import * as cj_helpers from './helpers';
+import * as cj_objects from './objects';
 import * as vscode from 'vscode';
 
 
@@ -41,6 +43,14 @@ export class Controller implements vscode.Disposable {
      * Stores the underlying extension context.
      */
     protected readonly _CONTEXT: vscode.ExtensionContext;
+    /**
+     * Stores the global state object for script.
+     */
+    protected _globalScriptStates: Object;
+    /**
+     * The current list of running jobs.
+     */
+    protected _jobs: cj_objects.ConfigJob[];
     /**
      * Stores the global output channel.
      */
@@ -84,6 +94,22 @@ export class Controller implements vscode.Disposable {
     }
 
     /**
+     * Returns a copy of the globals from the settings.
+     * 
+     * @returns {any} The global data.
+     */
+    public getGlobals(): any {
+        return cj_helpers.cloneObject(this.config.globals);
+    }
+
+    /**
+     * Gets the object that stores global data for all script.
+     */
+    public get globalScriptStates(): Object {
+        return this._globalScriptStates;
+    }
+
+    /**
      * Is invoked after extension has been activated.
      */
     public onActivated() {
@@ -94,6 +120,12 @@ export class Controller implements vscode.Disposable {
      * Is invoked when extension will be deactivated.
      */
     public onDeactivate() {
+        let jobs = cj_helpers.asArray(this._jobs)
+                             .filter(x => x);
+
+        jobs.forEach(x => {
+            cj_helpers.tryDispose(x);
+        });
     }
 
     /**
@@ -124,5 +156,44 @@ export class Controller implements vscode.Disposable {
         let cfg = <cj_contracts.Configuration>vscode.workspace.getConfiguration("cron.jobs");
 
         this._config = cfg;
+
+        this.reloadJobs();
+    }
+
+    /**
+     * Reloads the jobs.
+     */
+    protected reloadJobs() {
+        let me = this;
+        
+        let oldJobs = cj_helpers.asArray(me._jobs)
+                                .filter(x => x);
+
+        oldJobs.forEach(x => {
+            cj_helpers.tryDispose(x);
+        });
+
+        let newJobList = [];
+
+        let cfg = me.config;
+        me._globalScriptStates = {};
+
+        let jobs = cj_helpers.asArray(cfg.jobs)
+                             .filter(x => x);
+
+        jobs.forEach(x => {
+            let newJob = new cj_objects.ConfigJob(x, me);
+            newJobList.push(newJob);
+
+            if (cj_helpers.toBooleanSafe(x.autoStart, true)) {
+                newJob.start().then(() => {
+
+                }, (err) => {
+                    //TODO: log
+                });
+            }
+        });
+
+        this._jobs = newJobList;
     }
 }

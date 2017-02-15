@@ -28,6 +28,113 @@
  * App settings
  */
 export interface Configuration {
+    /**
+     * Data that is available everywhere, in scripts e.g.
+     */
+    globals?: any;
+    /**
+     * One or more job to configure.
+     */
+    jobs?: Job | Job[];
+}
+
+/**
+ * Settings for a job.
+ */
+export interface Job {
+    /**
+     * The command / action to invoke.
+     */
+    action?: string | JobAction;
+    /**
+     * Directly run on startup or not.
+     */
+    autoStart?: boolean;
+    /**
+     * The value to configure the job.
+     */
+    config?: string;
+    /**
+     * Format.
+     */
+    format?: string;
+    /**
+     * The custom timezone to use.
+     */
+    timeZone?: string;
+}
+
+/**
+ * A job action.
+ */
+export interface JobAction {
+    type?: string;
+}
+
+/**
+ * A job action for running a command.
+ */
+export interface JobCommandAction extends JobAction {
+    /**
+     * The optional arguments for the execution.
+     */
+    arguments?: any[];
+    /**
+     * The ID of the command to execute.
+     */
+    command: string;
+}
+
+/**
+ * A job action for running a script.
+ */
+export interface JobScriptAction extends JobAction {
+    /**
+     * Store script (module) in cache or not.
+     */
+    cached?: boolean;
+    /**
+     * Optional data for the execution.
+     */
+    options?: any;
+    /**
+     * The path to the script to execute.
+     */
+    script: string;
+    /**
+     * The initial state value for the script.
+     */
+    state?: any;
+}
+
+/**
+ * A script module of a job.
+ */
+export interface JobScriptModule extends ScriptModule {
+    /**
+     * The action for a job tick.
+     */
+    tick: JobScriptModuleExecutor;
+}
+
+/**
+ * Describes a function that is executed on a job tick.
+ * 
+ * @param {JobScriptModuleExecutorArguments} args The arguments for the execution.
+ * 
+ * @returns {JobScriptModuleExecutorResult} The result.
+ */
+export type JobScriptModuleExecutor = (args: JobScriptModuleExecutorArguments) => JobScriptModuleExecutorResult;
+
+/**
+ * The result of a job tick.
+ */
+export type JobScriptModuleExecutorResult = Thenable<number> | number | void;
+
+/**
+ * The arguments for a job tick.
+ */
+export interface JobScriptModuleExecutorArguments extends ScriptArguments {
 }
 
 /**
@@ -46,4 +153,60 @@ export interface PackageFile {
      * The version string.
      */
     version: string;
+}
+
+/**
+ * Script arguments.
+ */
+export interface ScriptArguments {
+    /**
+     * The global data from the settings.
+     */
+    readonly globals: any;
+    /**
+     * Gets an object that stores data for all scripts.
+     */
+    readonly globalState: Object;
+    /**
+     * Gets if the underlying job is currently running or not.
+     */
+    readonly isRunning: boolean;
+    /**
+     * Additional / optional data for the execution.
+     */
+    readonly options: any;
+    /**
+     * Loads a module from the script context.
+     * 
+     * @param {string} id The ID of the module.
+     * 
+     * @returns any The loaded module.
+     */
+    readonly require: (id: string) => any;
+    /**
+     * Starts the underlying job.
+     * 
+     * @param {number} [delay] The delay in milliseconds.
+     * 
+     * @return {Thenable<boolean>} The promise.
+     */
+    readonly start: (delay?: number) => Thenable<boolean>;
+    /**
+     * Stops the underlying job.
+     * 
+     * @param {number} [delay] The delay in milliseconds.
+     * 
+     * @return {Thenable<boolean>} The promise.
+     */
+    readonly stop: (delay?: number) => Thenable<boolean>;
+    /**
+     * Gets or sets a value for the script that is available while the current session.
+     */
+    state: any;
+}
+
+/**
+ * A script module.
+ */
+export interface ScriptModule {
 }
