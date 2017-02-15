@@ -198,6 +198,15 @@ exports.tick = function(args) {
     // s. https://github.com/Microsoft/vscode/blob/master/src/vs/workbench/common/memento.ts
     args.appState.update('myValue');  // app wide
     args.workspaceState.update('myValue');  // workspace wide
+    
+    // registers for a one-time event
+    args.once('myEvent', function(v) {
+        // 'v' should be 'Anders Hejlsberg'
+        // s. below
+    });
+    
+    // emit 'myEvent' event (s. above)
+    args.emit('myEvent', 'Anders Hejlsberg');
 
     // open HTML document in new tab (for repots e.g.)
     args.openHtml('<html>This is an HTML document</html>', 'My HTML document').then(function() {
