@@ -143,9 +143,8 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                 isActive = false;
 
                 me.stop().then(() => {
-                    //TODO
                 }, (err) => {
-                    //TODO: log
+                    me.controller.log(`[ERROR] objects.ConfigJob.startSync().stopScheduler(): ${cj_helpers.toStringSafe(err)}`);
                 });
             };
 
@@ -215,9 +214,10 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                 vscode.commands.executeCommand.apply(null, cmdArgs).then(() => {
                                     isExecuting = false;
                                 }, (err) => {
-                                    isExecuting = true;
+                                    isExecuting = false;
 
-                                    //TODO: log
+                                    me.controller
+                                      .log(`[ERROR] objects.ConfigJob.startSync().command.action(): ${cj_helpers.toStringSafe(err)}`);
                                 });
                             }
                             catch (e) {
@@ -240,7 +240,8 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                 let tickerCompleted = (err: any, exitCode?: number) => {
                                     try {
                                         if (err) {
-                                            //TODO: log
+                                            me.controller
+                                              .log(`[ERROR] objects.ConfigJob.startSync().script.action(): ${cj_helpers.toStringSafe(err)}`);
                                         }
                                         else {
                                             if (cj_helpers.isNullOrUndefined(exitCode)) {
@@ -261,6 +262,10 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                     let ticker = scriptModule.tick;
                                     if (ticker) {
                                         let tickerArgs: cj_contracts.JobScriptModuleExecutorArguments = {
+                                            emit: function() {
+                                                return me.emit
+                                                         .apply(me, arguments);
+                                            },
                                             globals: me.controller.getGlobals(),
                                             globalState: undefined,
                                             isRunning: undefined,
@@ -268,8 +273,20 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                                 me.controller.log(msg);
                                                 return this;
                                             },
+                                            on: function() {
+                                                me.on.apply(me, arguments);
+                                                return this;
+                                            },
+                                            once: function() {
+                                                me.once.apply(me, arguments);
+                                                return this;
+                                            },
                                             options: jsa.options,
                                             outputChannel: undefined,
+                                            removeListener: function() {
+                                                me.removeListener.apply(me, arguments);
+                                                return this;
+                                            },
                                             require: function(id) {
                                                 return cj_helpers.requireModule(id);
                                             },
@@ -304,9 +321,14 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                                     let completed = cj_helpers.createSimplePromiseCompletedAction(resolve, reject);
 
                                                     let stopJob = () => {
+                                                        let oldIsActive = isActive;
+                                                        isActive = false;
+
                                                         me.stop().then((hasStopped) => {
                                                             completed(null, hasStopped);
                                                         }, (err) => {
+                                                            isActive = oldIsActive;  // restore 'isActive'
+
                                                             completed(err);
                                                         });
                                                     };
@@ -510,7 +532,8 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                         action();
                     }
                     catch (e) {
-                        //TODO: log
+                        me.controller
+                          .log(`[ERROR] objects.ConfigJob.startSync().newScheduler: ${cj_helpers.toStringSafe(e)}`);
                     }
                 },
                 start: false,

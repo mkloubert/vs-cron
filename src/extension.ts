@@ -73,13 +73,50 @@ export function activate(context: vscode.ExtensionContext) {
 
         outputChannel.appendLine(popupMsg);
         popupAction(`[vs-cron] ${popupMsg}`).then(() => {
-            //TODO
         }, (err) => {
             cj_helpers.log(`[ERROR] extension.activate().showPopupMessage(): ${cj_helpers.toStringSafe(err)}`);
         });
     };
 
-    // starta job
+    let restartRunning = vscode.commands.registerCommand('extension.cronJons.restartRunningJobs', () => {
+        controller.restartRunningJobs().then((restartedJobs) => {
+            let popupMsg: string;
+            if (restartedJobs.length < 1) {
+                popupMsg = 'NO job has been RE-STARTED.';
+            }
+            else if (1 == restartedJobs.length) {
+                popupMsg = 'One job has been RE-STARTED.';
+            }
+            else {
+                popupMsg = `${restartedJobs.length} jobs have been RE-STARTED.`;
+            }
+
+            showPopupMessage(popupMsg,
+                             vscode.window.showInformationMessage);
+        }, (err) => {
+            showPopupMessage(`Could not RE-START RUNNING jobs: ${cj_helpers.toStringSafe(err)}`,
+                             vscode.window.showErrorMessage);
+        });
+    });
+
+    // re-starts a job
+    let restartJob = vscode.commands.registerCommand('extension.cronJons.restartJob', () => {
+        controller.restartJob().then((selectedJob) => {
+            if (false === selectedJob) {
+                showPopupMessage('There is no job that can be RE-STARTED.',
+                                 vscode.window.showWarningMessage);
+            }
+            else if (selectedJob) {
+                showPopupMessage(`Job '${selectedJob.label}' has been RE-STARTED.`,
+                                 vscode.window.showInformationMessage);
+            }
+        }, (err) => {
+            showPopupMessage(`Could not RE-START job: ${cj_helpers.toStringSafe(err)}`,
+                             vscode.window.showErrorMessage);
+        });
+    });
+
+    // starts a job
     let startJob = vscode.commands.registerCommand('extension.cronJons.startJob', () => {
         controller.startJob().then((selectedJob) => {
             if (false === selectedJob) {
@@ -163,7 +200,8 @@ export function activate(context: vscode.ExtensionContext) {
     // commands
     context.subscriptions
            .push(startJob, startNoRunning,
-                 stopJob, stopNoRunning);
+                 stopJob, stopNoRunning,
+                 restartJob, restartRunning);
 
     // notfiy setting changes
     context.subscriptions

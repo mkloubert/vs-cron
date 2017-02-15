@@ -214,6 +214,106 @@ export class Controller implements vscode.Disposable {
     }
 
     /**
+     * Restarts a specific job.
+     * 
+     * @returns {Thenable<false|cj_objects.ConfigJobQuickPickItem>} The promise. 
+     */
+    public restartJob(): Thenable<false | cj_objects.ConfigJobQuickPickItem> {
+        let me = this;
+
+        return new Promise<false | cj_objects.ConfigJobQuickPickItem>((resolve, reject) => {
+            let completed = cj_helpers.createSimplePromiseCompletedAction(resolve, reject);
+
+            try {
+                let quickPicks = cj_helpers.configJobsToQuickPicks(me._jobs
+                                                                     .filter(x => x && x.isRunning));
+                quickPicks.sort((x, y) => {
+                    return cj_helpers.compareValues(cj_helpers.normalizeString(x.label),
+                                                    cj_helpers.normalizeString(x.label));
+                });
+                                           
+                if (quickPicks.length > 0) {
+                    vscode.window.showQuickPick(quickPicks, {
+                        placeHolder: 'Select the job you would like to RE-START...',
+                    }).then(x => {
+                        if (x) {
+                            // first stop ...
+                            x.job.stop().then(() => {
+                                // ... then start
+                                x.job.start().then(() => {
+                                    completed(null, x);
+                                }, (err) => {
+                                    completed(err, x);
+                                });
+                            }, (err) => {
+                                completed(err);
+                            });
+                        }
+                        else {
+                            completed(null);  // nothing selected
+                        }
+                    });
+                }
+                else {
+                    completed(null, false);  // no items available
+                }
+            }
+            catch (e) {
+                completed(e);
+            }
+        });
+    }
+
+    /**
+     * Restarts all running jobs.
+     * 
+     * @returns {Thenable<cj_objects.ConfigJob[]>} The promise.
+     */
+    public restartRunningJobs(): Thenable<cj_objects.ConfigJob[]> {
+        let me = this;
+        
+        return new Promise<cj_objects.ConfigJob[]>((resolve, reject) => {
+            let completed = cj_helpers.createSimplePromiseCompletedAction(resolve, reject);
+
+            try {
+                let restartedJobs: cj_objects.ConfigJob[] = [];
+                let runningJobs = me._jobs.filter(x => x.isRunning);
+
+                let nextJob: () => void;
+                nextJob = () => {
+                    if (runningJobs.length < 1) {
+                        completed(null, restartedJobs);
+                        return;
+                    }
+
+                    let j = runningJobs.shift();
+                    
+                    // first stop ...
+                    j.stop().then(() => {
+                        // ... and start again
+                        j.start().then((hasStarted) => {
+                            if (hasStarted) {
+                                restartedJobs.push(j);
+                            }
+
+                            nextJob();
+                        }, (err) => {
+                            completed(err);
+                        });
+                    }, (err) => {
+                        completed(err);
+                    });
+                };
+
+                nextJob();
+            }
+            catch (e) {
+                completed(e);
+            }
+        });
+    }
+
+    /**
      * Starts a specific job.
      * 
      * @returns {Thenable<false|cj_objects.ConfigJobQuickPickItem>} The promise. 
@@ -234,12 +334,10 @@ export class Controller implements vscode.Disposable {
                                            
                 if (quickPicks.length > 0) {
                     vscode.window.showQuickPick(quickPicks, {
-                        placeHolder: 'Select the job to start...',
+                        placeHolder: 'Select the job you would like to START...',
                     }).then(x => {
                         if (x) {
                             x.job.start().then(() => {
-                                let isRunning = x.job.isRunning;
-
                                 completed(null, x);
                             }, (err) => {
                                 completed(err, x);
@@ -324,7 +422,7 @@ export class Controller implements vscode.Disposable {
                                            
                 if (quickPicks.length > 0) {
                     vscode.window.showQuickPick(quickPicks, {
-                        placeHolder: 'Select the job to stop...',
+                        placeHolder: 'Select the job you would like to STOP...',
                     }).then(x => {
                         if (x) {
                             x.job.stop().then(() => {

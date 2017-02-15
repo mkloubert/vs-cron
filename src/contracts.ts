@@ -201,6 +201,15 @@ export interface PackageFile {
  */
 export interface ScriptArguments {
     /**
+     * Events an event.
+     * 
+     * @param {string} event The event to emit.
+     * @param {any[]} [args] Additional arguments for the event.
+     * 
+     * @returns {boolean} Event was emitted or not.
+     */
+    readonly emit: (event: string | Symbol, ...args: any[]) => boolean;
+    /**
      * The global data from the settings.
      */
     readonly globals: any;
@@ -221,6 +230,24 @@ export interface ScriptArguments {
      */
     readonly log: (msg: any) => ScriptArguments;
     /**
+     * Registers for an event.
+     * 
+     * @param {string|Symbol} event The event to register for.
+     * @param {Function} listener The event listener.
+     * 
+     * @chainable
+     */
+    readonly on: (event: string | Symbol, listener: Function) => ScriptArguments;
+    /**
+     * Registers for an one-time event.
+     * 
+     * @param {string|Symbol} event The event to register for.
+     * @param {Function} listener The event listener.
+     * 
+     * @chainable
+     */
+    readonly once: (event: string | Symbol, listener: Function) => ScriptArguments;
+    /**
      * Additional / optional data for the execution.
      */
     readonly options: any;
@@ -228,6 +255,15 @@ export interface ScriptArguments {
      * Gets the output channel the script can use.
      */
     readonly outputChannel: vscode.OutputChannel;
+    /**
+     * Registers for an one-time event.
+     * 
+     * @param {string|Symbol} event The event to register for.
+     * @param {Function} listener The event listener.
+     * 
+     * @chainable
+     */
+    readonly removeListener: (event: string | Symbol, listener: Function) => ScriptArguments;
     /**
      * Loads a module from the script context.
      * 
