@@ -114,6 +114,13 @@ Add a `cron.jobs` section:
 }
 ```
 
+The `action` property has the following format:
+
+| Name | Description |
+| ---- | --------- |
+| `arguments` | Optional / required arguments for the command. |
+| `command` | The ID of the command to execute. |
+
 ##### Scripts [[&uarr;](#scripts-)]
 
 ```json
@@ -126,13 +133,79 @@ Add a `cron.jobs` section:
 
                 "action": {
                     "type": "script",
-                    "script": "./my-cron-script.js"
+                    "script": "./my-cron-script.js",
+                    
+                    "options": "TM",
+                    "state": 23979
                 }
             }
         ]
     }
 }
 ```
+
+The `action` property has the following format:
+
+| Name | Description |
+| ---- | --------- |
+| `cached` | Store script (module) in cache or not. Default: `(false)` |
+| `options` | Optional data for the execution. |
+| `script` | The path to the script to execute. |
+| `state` | The initial state value for the script. |
+
+The script should look like this:
+
+```javascript
+exports.tick = function(args) {
+    // access VS Code API (s. https://code.visualstudio.com/Docs/extensionAPI/vscode-api)
+    var vscode = require('vscode');
+
+    // access Node.js API provided by VS Code
+    // s.  (s. https://nodejs.org/api/)
+    var fs = require('fs');
+
+    // access an own module
+    var myModule = require('./my-module.js');
+
+    // access a module used by the extension:
+    // s. https://mkloubert.github.io/vs-cron/modules/_helpers_.html
+    var helpers = args.require('./helpers');
+
+    // access a module that is part of the extentsion
+    // s. https://github.com/mkloubert/vs-cron/blob/master/package.json
+    var moment = args.require('moment');
+
+    // access the data from the settings
+    // from the example above this is: "TM"
+    var opts = args.options;
+
+    // share / store data (while current session)...
+    // ... for this script
+    var myState = args.state;  // 23979 at the beginning (s. settings above)
+    args.state = new Date();
+    // ... with other scripts of this type
+    args.globalState['myEndpoint'] = new Date();
+    
+    // access permantent data storages
+    // s. https://github.com/Microsoft/vscode/blob/master/src/vs/workbench/common/memento.ts
+    args.appState.update('myValue');  // app wide
+    args.workspaceState.update('myValue');  // workspace wide
+
+    // open HTML document in new tab (for repots e.g.)
+    args.openHtml('<html>This is an HTML document</html>', 'My HTML document').then(function() {
+        // HTML opened
+    }, function(err) {
+        // opening HTML document failed
+    });
+
+
+    // ...
+}
+```
+
+The `args` parameter uses the [JobScriptModuleExecutorArguments](https://mkloubert.github.io/vs-cron/interfaces/_contracts_.jobscriptmoduleexecutorarguments.html) interface.
+
+You can return a number (sync execution), a [Promise](https://github.com/Microsoft/vscode-extension-vscode/blob/master/thenable.d.ts) or nothing (default exit code `0`).
 
 ### Commands [[&uarr;](#how-to-use-)]
 
