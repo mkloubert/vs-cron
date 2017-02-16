@@ -218,7 +218,7 @@ exports.tick = function(args) {
     // emit 'myEvent' event (s. above)
     args.emit('myEvent', 'Anders Hejlsberg');
 
-    // open HTML document in new tab (for repots e.g.)
+    // open HTML document in new tab (for reports e.g.)
     args.openHtml('<html>This is an HTML document</html>', 'My HTML document').then(function() {
         // HTML opened
     }, function(err) {
