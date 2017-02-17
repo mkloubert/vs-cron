@@ -32,6 +32,10 @@ import * as vscode from 'vscode';
  */
 export interface Configuration {
     /**
+     * Disable popups that report for a new (installed) version or not.
+     */
+    disableNewVersionPopups?: boolean;
+    /**
      * Data that is available everywhere, in scripts e.g.
      */
     globals?: any;
@@ -398,6 +402,25 @@ export interface PackageFile {
      */
     version: string;
 }
+
+/**
+ * Describes a button of a popup.
+ */
+export interface PopupButton extends vscode.MessageItem {
+    /**
+     * Gets the action of that button.
+     */
+    action?: PopupButtonAction;
+    /**
+     * Contains an additional object that should be linked with that instance.
+     */
+    tag?: any;
+}
+
+/**
+ * A popup button action.
+ */
+export type PopupButtonAction = () => void;
 
 /**
  * Script arguments.

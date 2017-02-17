@@ -335,6 +335,77 @@ export class Controller implements vscode.Disposable {
     }
 
     /**
+     * Shows the popup for a new version.
+     */
+    protected showNewVersionPopup() {
+        let me = this;
+
+        let pkg = me.packageFile;
+        if (!pkg) {
+            return;
+        }
+
+        let currentVersion = pkg.version;
+        if (!currentVersion) {
+            return;
+        }
+
+        const KEY_LAST_KNOWN_VERSION = 'vscjLastKnownVersion';
+
+        // update last known version
+        let updateCurrentVersion = false;
+        try {
+            let lastKnownVersion: any = this._CONTEXT.globalState.get(KEY_LAST_KNOWN_VERSION, false);
+            if (lastKnownVersion != currentVersion) {
+                if (!cj_helpers.toBooleanSafe(this.config.disableNewVersionPopups)) {
+                    // tell the user that it runs on a new version
+                    updateCurrentVersion = true;
+
+                    // [BUTTON] show change log
+                    let changeLogBtn: cj_contracts.PopupButton = {
+                        action: () => {
+                            cj_helpers.open('https://github.com/mkloubert/vs-cron/blob/master/CHANGELOG.md').then(() => {
+                            }, (err) => {
+                                me.log(`[ERROR] Controller.showNewVersionPopup(4): ${cj_helpers.toStringSafe(err)}`);
+                            });
+                        },
+                        title: 'Show CHANGELOG',
+                    };
+
+                    vscode.window
+                          .showInformationMessage(`You have installed the new version ${currentVersion} of 'vs-cron'!`,
+                                                  changeLogBtn)
+                          .then((item) => {
+                                    if (!item || !item.action) {
+                                        return;
+                                    }
+
+                                    try {
+                                        item.action();
+                                    }
+                                    catch (e) { 
+                                        me.log(`[ERROR] Controller.showNewVersionPopup(3): ${cj_helpers.toStringSafe(e)}`);
+                                    }
+                                });
+                }
+            }
+        }
+        catch (e) { 
+            me.log(`[ERROR] Controller.showNewVersionPopup(2): ${cj_helpers.toStringSafe(e)}`);
+        }
+
+        if (updateCurrentVersion) {
+            // update last known version
+            try {
+                this._CONTEXT.globalState.update(KEY_LAST_KNOWN_VERSION, currentVersion);
+            }
+            catch (e) {
+                me.log(`[ERROR] Controller.showNewVersionPopup(1): ${cj_helpers.toStringSafe(e)}`);
+            }
+        }
+    }
+
+    /**
      * Starts a specific job.
      * 
      * @returns {Thenable<false|cj_objects.ConfigJobQuickPickItem>} The promise. 

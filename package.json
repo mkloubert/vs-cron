@@ -2,7 +2,7 @@
   "name": "vs-cron",
   "displayName": "Cron Jobs",
   "description": "Extension that runs tasks periodically.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "publisher": "mkloubert",
   "engines": {
     "vscode": "^1.5.0"
@@ -60,6 +60,11 @@
         "cron.jobs": {
           "type": "object",
           "properties": {
+            "disableNewVersionPopups": {
+              "description": "Data that is available everywhere, in scripts e.g.",
+              "type": "boolean",
+              "default": false
+            },
             "globals": {
               "description": "Data that is available everywhere, in scripts e.g."
             },
