@@ -195,6 +195,8 @@ export class Controller implements vscode.Disposable {
         this._config = cfg;
         this._htmlDocs = [];
 
+        this.showNewVersionPopup();
+
         this.reloadJobs();
     }
 
