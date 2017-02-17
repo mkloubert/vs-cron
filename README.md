@@ -165,7 +165,7 @@ The `action` property has the following format:
 | `script` | The path to the script to execute. |
 | `state` | The initial state value for the script. |
 
-The `./my-cron-script.js` script file should look like this:
+The `./my-cron-script.js` script file must have a public / exported `tick()` function:
 
 ```javascript
 exports.tick = function(args) {
@@ -208,6 +208,10 @@ exports.tick = function(args) {
     // s. https://github.com/Microsoft/vscode/blob/master/src/vs/workbench/common/memento.ts
     var myAppWideValue = args.appState.get('myAppValue');  // app wide
     args.workspaceState.update('myWorkspaceValue', 'New workspace wide value');  // workspace wide
+
+    // share data between two executions
+    var prevVal = args.previousValue;  // data from the previous execution
+    args.nextValue = 'This is a value only for the next execution';  // data for the next execution
     
     // registers for a one-time event
     args.once('myEvent', function(v) {
