@@ -175,7 +175,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             jobNames.forEach(jn => {
                 let schedulersToRestart = controller.getJobSchedulers()
-                                                    .filter(x => x.name === jn);
+                                                    .filter(x => cj_helpers.normalizeString(x.name) === jn);
 
                 schedulersToRestart.forEach(s => {
                     let startScheduler = () => {
@@ -231,7 +231,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             jobNames.forEach(jn => {
                 let schedulersToStart = controller.getJobSchedulers()
-                                                  .filter(x => x.name === jn &&
+                                                  .filter(x => cj_helpers.normalizeString(x.name) === jn &&
                                                                !x.isRunning);
 
                 schedulersToStart.forEach(s => {
@@ -295,7 +295,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             jobNames.forEach(jn => {
                 let schedulersToStop = controller.getJobSchedulers()
-                                                 .filter(x => x.name === jn &&
+                                                 .filter(x => cj_helpers.normalizeString(x.name) === jn &&
                                                               x.isRunning);
 
                 schedulersToStop.forEach(s => {
