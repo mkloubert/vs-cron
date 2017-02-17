@@ -91,6 +91,16 @@ export class ConfigJob extends events.EventEmitter implements cj_contracts.JobSc
     }
 
     /** @inheritdoc */
+    public get description(): string {
+        return this.config.description;
+    }
+
+    /** @inheritdoc */
+    public get detail(): string {
+        return this.config.__detail;
+    }
+
+    /** @inheritdoc */
     public dispose() {
         this.stopSync();
 
@@ -114,7 +124,7 @@ export class ConfigJob extends events.EventEmitter implements cj_contracts.JobSc
 
     /** @inheritdoc */
     public get name(): string {
-        return cj_helpers.normalizeString(this.config.name);
+        return this.config.name;
     }
 
     /**

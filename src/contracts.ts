@@ -169,6 +169,14 @@ export interface JobCommandAction extends JobAction {
  */
 export interface JobInfo {
     /**
+     * Gets the description of the underlying job.
+     */
+    readonly description: string;
+    /**
+     * Gets the details for the underlying job.
+     */
+    readonly detail: string;
+    /**
      * Gets if the job is currently running or not.
      */
     readonly isRunning: boolean;
@@ -192,6 +200,14 @@ export type JobNames = string | string[];
  */
 export interface JobScheduler extends vscode.Disposable {
     /**
+     * Gets the description of the underlying job.
+     */
+    readonly description: string;
+    /**
+     * Gets the details for the underlying job.
+     */
+    readonly detail: string;
+    /**
      * Gets if the scheduler is running or not.
      */
     readonly isRunning: boolean;
@@ -200,7 +216,7 @@ export interface JobScheduler extends vscode.Disposable {
      */
     readonly lastExecution: Moment.Moment;
     /**
-     * Gets the name of the underlying job (lower case).
+     * Gets the name of the underlying job.
      */
     readonly name: string;
     /**

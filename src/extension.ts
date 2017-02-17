@@ -86,6 +86,8 @@ export function activate(context: vscode.ExtensionContext) {
                 let le = s.lastExecution;
 
                 return {
+                    description: s.description,
+                    detail: s.detail,
                     isRunning: s.isRunning,
                     lastExecution: le ? le.utc().toISOString() : null,
                     name: s.name,
