@@ -212,7 +212,8 @@ exports.tick = function(args) {
     // registers for a one-time event
     args.once('myEvent', function(v) {
         // 'v' should be 'Anders Hejlsberg'
-        // s. below
+        // if upcoming 'args.emit()' is called
+        args.log("From 'myEvent': " + v);
     });
     
     // emit 'myEvent' event (s. above)

@@ -443,7 +443,7 @@ export type PopupButtonAction = () => void;
  */
 export interface ScriptArguments {
     /**
-     * Events an event.
+     * Emits an event.
      * 
      * @param {string} event The event to emit.
      * @param {any[]} [args] Additional arguments for the event.
