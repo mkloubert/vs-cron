@@ -79,6 +79,28 @@ export function activate(context: vscode.ExtensionContext) {
         });
     };
 
+    // get jobs
+    let getJobs = vscode.commands.registerCommand('extension.cronJons.getJobs', (cb: (err: any, result: cj_contracts.JobInfo[]) => void) => {
+        try {
+            let jobInfos = controller.getJobSchedulers().map(s => {
+                let le = s.lastExecution;
+
+                return {
+                    isRunning: s.isRunning,
+                    lastExecution: le ? le.utc().toISOString() : null,
+                    name: s.name,
+                };
+            });
+
+            if (cb) {
+                cb(null, jobInfos);
+            }
+        }
+        catch (e) {
+            cj_helpers.log(`[ERROR] extension.cronJons.getJobs(): ${e}`);
+        }
+    });
+
     // open HTML document
     let openHtmlDoc = vscode.commands.registerCommand('extension.cronJons.openHtmlDoc', (doc: cj_contracts.Document) => {
         try {
@@ -143,6 +165,45 @@ export function activate(context: vscode.ExtensionContext) {
         });
     });
 
+    // re-starts jobs by name
+    let restartJobsByName = vscode.commands.registerCommand('extension.cronJons.restartJobsByName', (jobNames: cj_contracts.JobNames) => {
+        try {
+            jobNames = cj_helpers.asArray(jobNames).map(x => cj_helpers.normalizeString(x)).filter(x => x);
+            jobNames = cj_helpers.distinctArray(jobNames);
+
+            jobNames.forEach(jn => {
+                let schedulersToRestart = controller.getJobSchedulers()
+                                                    .filter(x => x.name === jn);
+
+                schedulersToRestart.forEach(s => {
+                    let startScheduler = () => {
+                        s.start().then((hasStarted) => {
+                            //TODO
+                        }, (err) => {
+                            cj_helpers.log(`[ERROR] extension.cronJons.restartJobsByName(3): ${err}`);
+                        });
+                    };
+
+                    if (s.isRunning) {
+                        // first stop ...
+                        s.stop().then((hasStopped) => {
+                            // then start...
+                            startScheduler();
+                        }, (err) => {
+                            cj_helpers.log(`[ERROR] extension.cronJons.restartJobsByName(2): ${err}`);
+                        });
+                    }
+                    else {
+                        startScheduler();
+                    }
+                });
+            });
+        }
+        catch (e) {
+            cj_helpers.log(`[ERROR] extension.cronJons.restartJobsByName(1): ${e}`);
+        }
+    });
+
     // starts a job
     let startJob = vscode.commands.registerCommand('extension.cronJons.startJob', () => {
         controller.startJob().then((selectedJob) => {
@@ -158,6 +219,31 @@ export function activate(context: vscode.ExtensionContext) {
             showPopupMessage(`Could not START job: ${cj_helpers.toStringSafe(err)}`,
                              vscode.window.showErrorMessage);
         });
+    });
+
+    // starts jobs by name
+    let startJobsByName = vscode.commands.registerCommand('extension.cronJons.startJobsByName', (jobNames: cj_contracts.JobNames) => {
+        try {
+            jobNames = cj_helpers.asArray(jobNames).map(x => cj_helpers.normalizeString(x)).filter(x => x);
+            jobNames = cj_helpers.distinctArray(jobNames);
+
+            jobNames.forEach(jn => {
+                let schedulersToStart = controller.getJobSchedulers()
+                                                  .filter(x => x.name === jn &&
+                                                               !x.isRunning);
+
+                schedulersToStart.forEach(s => {
+                    s.start().then((hasStarted) => {
+                        //TODO
+                    }, (err) => {
+                        cj_helpers.log(`[ERROR] extension.cronJons.startJobsByName(2): ${err}`);
+                    });
+                });
+            });
+        }
+        catch (e) {
+            cj_helpers.log(`[ERROR] extension.cronJons.startJobsByName(1): ${e}`);
+        }
     });
 
     // start non running jobs
@@ -199,6 +285,31 @@ export function activate(context: vscode.ExtensionContext) {
         });
     });
 
+    // stops jobs by name
+    let stopJobsByName = vscode.commands.registerCommand('extension.cronJons.stopJobsByName', (jobNames: cj_contracts.JobNames) => {
+        try {
+            jobNames = cj_helpers.asArray(jobNames).map(x => cj_helpers.normalizeString(x)).filter(x => x);
+            jobNames = cj_helpers.distinctArray(jobNames);
+
+            jobNames.forEach(jn => {
+                let schedulersToStop = controller.getJobSchedulers()
+                                                 .filter(x => x.name === jn &&
+                                                              x.isRunning);
+
+                schedulersToStop.forEach(s => {
+                    s.stop().then((hasStopped) => {
+                        //TODO
+                    }, (err) => {
+                        cj_helpers.log(`[ERROR] extension.cronJons.stopJobsByName(2): ${err}`);
+                    });
+                });
+            });
+        }
+        catch (e) {
+            cj_helpers.log(`[ERROR] extension.cronJons.stopJobsByName(1): ${e}`);
+        }
+    });
+
     // stop all running jobs
     let stopNoRunning = vscode.commands.registerCommand('extension.cronJons.stopRunningJobs', () => {
         controller.stopRunningJobs().then((stoppedJobs) => {
@@ -224,7 +335,6 @@ export function activate(context: vscode.ExtensionContext) {
     let htmlViewer = vscode.workspace.registerTextDocumentContentProvider('vs-cron-html',
                                                                           new cj_content.HtmlTextDocumentContentProvider(controller));
 
-
     // controller
     context.subscriptions
            .push(controller);
@@ -236,9 +346,10 @@ export function activate(context: vscode.ExtensionContext) {
     // commands
     context.subscriptions
            .push(openHtmlDoc,
-                startJob, startNoRunning,
-                 stopJob, stopNoRunning,
-                 restartJob, restartRunning);
+                 getJobs,
+                 startJob, startNoRunning, startJobsByName,
+                 stopJob, stopNoRunning, stopJobsByName,
+                 restartJob, restartRunning, restartJobsByName);
 
     // notfiy setting changes
     context.subscriptions

@@ -108,6 +108,15 @@ export class Controller implements vscode.Disposable {
     }
 
     /**
+     * Returns a copy of the list of job job schedulers.
+     * 
+     * @returns {cj_contracts.JobScheduler[]} The list of schedulers.
+     */
+    public getJobSchedulers(): cj_contracts.JobScheduler[] {
+        return this._jobs.map(x => x);
+    }
+
+    /**
      * Gets the object that stores global data for all script.
      */
     public get globalScriptStates(): Object {

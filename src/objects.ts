@@ -45,7 +45,7 @@ export const EVENT_JOB_STOPPED = 'job.stopped';
 /**
  * A job based on config settins.
  */
-export class ConfigJob extends events.EventEmitter implements vscode.Disposable {
+export class ConfigJob extends events.EventEmitter implements cj_contracts.JobScheduler {
     /**
      * Stores the underlying config entry.
      */
@@ -54,6 +54,10 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
      * Stores the underlying controller.
      */
     protected readonly _CONTROLLER: cj_controller.Controller;
+    /**
+     * Stores the timestamp of the last execution.
+     */
+    protected _lastExecution: Moment.Moment;
     /**
      * Stores the current job scheduler.
      */
@@ -99,6 +103,18 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
     public get isRunning(): boolean {
         let s = this._scheduler;
         return cj_helpers.toBooleanSafe(s && s.running);
+    }
+
+    /**
+     * Gets the timestamp of the last execution.
+     */
+    public get lastExecution(): Moment.Moment {
+        return this._lastExecution;
+    }
+
+    /** @inheritdoc */
+    public get name(): string {
+        return cj_helpers.normalizeString(this.config.name);
     }
 
     /**
@@ -148,7 +164,7 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                 });
             };
 
-            let startedActions: Function[] = [];
+            let onStartingActions: Function[] = [];
 
             let cfg = me.config;
 
@@ -260,12 +276,13 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                         let jsa = <cj_contracts.JobScriptAction>jobAction;
 
                         let doCacheScript = cj_helpers.toBooleanSafe(jsa.cached);
+                        let prevValue: any;
                         let scriptState = jsa.state;
                         let scriptToExecute = jsa.script;
                         action = () => {
                             try {
                                 isExecuting = true;
-                                let tickerCompleted = (err: any, exitCode?: number) => {
+                                let tickerCompleted = (err: any, exitCode?: number, nextVal?: any) => {
                                     try {
                                         if (err) {
                                             me.controller
@@ -280,6 +297,8 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                         }
                                     }
                                     finally {
+                                        prevValue = nextVal;
+
                                         isExecuting = false;
                                     }
                                 };
@@ -332,6 +351,7 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                             globalState: undefined,
                                             isActive: undefined,
                                             isRunning: undefined,
+                                            lastExecution: undefined,
                                             log: function(msg) {
                                                 me.controller.log(msg);
                                                 return this;
@@ -339,6 +359,7 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                             maximum: undefined,
                                             minimum: undefined,
                                             name: undefined,
+                                            nextValue: undefined,
                                             on: function() {
                                                 me.on.apply(me, arguments);
                                                 return this;
@@ -354,6 +375,7 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                             options: jsa.options,
                                             outputChannel: undefined,
                                             packageFile: cj_helpers.cloneObject(me.controller.packageFile),
+                                            previousValue: undefined,
                                             removeListener: function() {
                                                 me.removeListener.apply(me, arguments);
                                                 return this;
@@ -500,6 +522,14 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                             }
                                         });
 
+                                        // tickerArgs.lastExecution
+                                        Object.defineProperty(tickerArgs, 'lastExecution', {
+                                            enumerable: true,
+                                            get: () => {
+                                                return me.lastExecution;
+                                            }
+                                        });
+
                                         // tickerArgs.maximum
                                         Object.defineProperty(tickerArgs, 'maximum', {
                                             enumerable: true,
@@ -538,6 +568,14 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                             enumerable: true,
                                             get: () => {
                                                 return me.controller.outputChannel;
+                                            }
+                                        });
+
+                                        // tickerArgs.previousValue
+                                        Object.defineProperty(tickerArgs, 'previousValue', {
+                                            enumerable: true,
+                                            get: () => {
+                                                return prevValue;
                                             }
                                         });
 
@@ -642,21 +680,26 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                                             }
                                         });
 
-                                        let tickerResult = ticker(tickerArgs);
-                                        if (tickerResult) {
-                                            if ('object' === typeof tickerResult) {
-                                                tickerResult.then((ec) => {
-                                                    tickerCompleted(null, ec);
-                                                }, (err) => {
-                                                    tickerCompleted(err);
-                                                });
+                                        try {
+                                            let tickerResult = ticker(tickerArgs);
+                                            if (tickerResult) {
+                                                if ('object' === typeof tickerResult) {
+                                                    tickerResult.then((ec) => {
+                                                        tickerCompleted(null, ec, tickerArgs.nextValue);
+                                                    }, (err) => {
+                                                        tickerCompleted(err, undefined, tickerArgs.nextValue);
+                                                    });
+                                                }
+                                                else {
+                                                    tickerCompleted(null, tickerResult, tickerArgs.nextValue);
+                                                }
                                             }
                                             else {
-                                                tickerCompleted(null, tickerResult);
+                                                tickerCompleted(null, 0, tickerArgs.nextValue);
                                             }
                                         }
-                                        else {
-                                            tickerCompleted(null, 0);
+                                        catch (e) {
+                                            tickerCompleted(e, undefined, tickerArgs.nextValue);
                                         }
                                     }
                                     else {
@@ -694,7 +737,7 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
             
             // start delay
             let isOnDelay = false;
-            startedActions.push(() => {
+            onStartingActions.push(() => {
                 let startDelay = parseInt(cj_helpers.toStringSafe(cfg.startDelay));
                 
                 if (!isNaN(startDelay)) {
@@ -771,6 +814,7 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                             }
                         }
                         
+                        me._lastExecution = Moment();
                         action();
                     }
                     catch (e) {
@@ -782,12 +826,13 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
                 timeZone: timeZone,
             });
 
-            startedActions.forEach(x => {
+            onStartingActions.forEach(x => {
                 x();
             });
 
+            me._lastExecution = null;
             newScheduler.start();
-
+            
             me._scheduler = newScheduler;
 
             started = true;
@@ -841,6 +886,7 @@ export class ConfigJob extends events.EventEmitter implements vscode.Disposable 
             stopped = true;
 
             me._scheduler = null;
+            me._lastExecution = undefined;
         }
 
         if (stopped) {

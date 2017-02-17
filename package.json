@@ -2,7 +2,7 @@
   "name": "vs-cron",
   "displayName": "Cron Jobs",
   "description": "Extension that runs tasks periodically.",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "publisher": "mkloubert",
   "engines": {
     "vscode": "^1.5.0"

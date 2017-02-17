@@ -161,6 +161,59 @@ export interface JobCommandAction extends JobAction {
 }
 
 /**
+ * Information about a job.
+ */
+export interface JobInfo {
+    /**
+     * Gets if the job is currently running or not.
+     */
+    readonly isRunning: boolean;
+    /**
+     * Gets the timestamp of the last execution in ISO format.
+     */
+    readonly lastExecution: string;
+    /**
+     * Gets the name of the job.
+     */
+    readonly name: string;
+}
+
+/**
+ * Job name(s).
+ */
+export type JobNames = string | string[];
+
+/**
+ * A job scheduler.
+ */
+export interface JobScheduler extends vscode.Disposable {
+    /**
+     * Gets if the scheduler is running or not.
+     */
+    readonly isRunning: boolean;
+    /**
+     * Gets the timestamp of the last execution.
+     */
+    readonly lastExecution: Moment.Moment;
+    /**
+     * Gets the name of the underlying job (lower case).
+     */
+    readonly name: string;
+    /**
+     * Starts the scheduler.
+     * 
+     * @returns {Thenable<boolean>} The promise.
+     */
+    readonly start: () => Thenable<boolean>;
+    /**
+     * Stops the scheduler.
+     * 
+     * @returns {Thenable<boolean>} The promise.
+     */
+    readonly stop: () => Thenable<boolean>;
+}
+
+/**
  * A job action for running a script.
  */
 export interface JobScriptAction extends JobAction {
@@ -255,6 +308,10 @@ export interface JobScriptModuleExecutorArguments extends ScriptArguments {
      */
     readonly isRunning: boolean;
     /**
+     * Gets the timestamp of the previous execution.
+     */
+    readonly lastExecution: Moment.Moment;
+    /**
      * Gets or sets the maximum value that indicates how often the job can be executed.
      */
     maximum: number;
@@ -270,6 +327,14 @@ export interface JobScriptModuleExecutorArguments extends ScriptArguments {
      * The package file with the information about this extension.
      */
     readonly packageFile: PackageFile;
+    /**
+     * Gets the value from the previous execution.
+     */
+    readonly previousValue: any;
+    /**
+     * Gets or sets the value for the next execution.
+     */
+    nextValue: any;
     /**
      * Gets or sets the value that indicates if this job can ran parallel to another or not.
      */
