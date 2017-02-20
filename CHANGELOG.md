@@ -1,5 +1,9 @@
 # Change Log (vs-cron)
 
+## 1.4.0 (February 20th, 2017; deploy files)
+
+* added [deploy](https://mkloubert.github.io/vs-cron/interfaces/_contracts_.jobscriptmoduleexecutorarguments.html#deploy) method to [JobScriptModuleExecutorArguments](https://mkloubert.github.io/vs-cron/interfaces/_contracts_.jobscriptmoduleexecutorarguments.html) which make use of `extension.deploy.filesTo` command, provided by [vs-deploy](https://github.com/mkloubert/vs-deploy) extension
+
 ## 1.2.0 (February 17th, 2017; new version popups)
 
 * now showing popups for new installed versions of that extension, which can be deactivated by [disableNewVersionPopups](https://mkloubert.github.io/vs-cron/interfaces/_contracts_.configuration.html#disablenewversionpopups) property

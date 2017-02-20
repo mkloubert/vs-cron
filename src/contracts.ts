@@ -320,6 +320,19 @@ export interface JobScriptModuleExecutorArguments extends ScriptArguments {
      */
     detail: string;
     /**
+     * Deploys one or more file to a list of targets.
+     * 
+     * This requires 'extension.deploy.filesTo' command as available in extensions like 'vs-deploy'
+     * s. https://github.com/mkloubert/vs-deploy
+     * 
+     * @param {string|string[]} files One or more file to deploy.
+     * @param {string|string[]} targets One or more target (name) to deploy to.
+     * 
+     * @returns {Promise<any>} The promise.
+     */
+    readonly deploy: (files: string | string[],
+                      targets: string | string[]) => Promise<any>;
+    /**
      * Gets if the underlying job is active or not.
      */
     readonly isActive: boolean;

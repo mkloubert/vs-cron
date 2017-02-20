@@ -353,6 +353,34 @@ export class ConfigJob extends events.EventEmitter implements cj_contracts.JobSc
                                             },
                                             description: undefined,
                                             detail: undefined,
+                                            deploy: (files, targets) => {
+                                                // files
+                                                files = cj_helpers.asArray(files)
+                                                                  .map(x => cj_helpers.toStringSafe(x))
+                                                                  .filter(x => !cj_helpers.isEmptyString(x));
+                                                files = cj_helpers.distinctArray(files);
+
+                                                // targets
+                                                targets = cj_helpers.asArray(targets)
+                                                                    .map(x => cj_helpers.normalizeString(x))
+                                                                    .filter(x => x);
+                                                targets = cj_helpers.distinctArray(targets);
+
+                                                return new Promise<any>((resolve, reject) => {
+                                                    let completed = cj_helpers.createSimplePromiseCompletedAction(resolve, reject);
+
+                                                    try {
+                                                        vscode.commands.executeCommand('extension.deploy.filesTo', files, targets).then((result) => {
+                                                            completed(null, result);
+                                                        }, (err) => {
+                                                            completed(err);
+                                                        });
+                                                    }
+                                                    catch (e) {
+                                                        completed(e);
+                                                    }
+                                                });
+                                            },
                                             emit: function() {
                                                 return me.emit
                                                          .apply(me, arguments);

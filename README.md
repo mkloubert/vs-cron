@@ -230,6 +230,13 @@ exports.tick = function(args) {
         // opening HTML document failed
     });
 
+    // deploys 'index.html' to 'My SFTP server'
+    // s. https://github.com/mkloubert/vs-deploy
+    args.deploy(['./index.html'], ['My SFTP server']).then(function() {
+        // file deployed
+    }, function(err) {
+        // deployment failed
+    });
 
     // ...
 }
