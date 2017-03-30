@@ -2,7 +2,7 @@
   "name": "vs-cron",
   "displayName": "Cron Jobs",
   "description": "Extension that runs tasks periodically.",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "publisher": "mkloubert",
   "engines": {
     "vscode": "^1.5.0"
@@ -324,9 +324,53 @@
                           }
                         ]
                       },
+                      "if": {
+                        "description": "A list of one or more conditions (as JavaScript code) that define if job is available not.",
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        ]
+                      },
+                      "isFor": {
+                        "description": "A list of one or more (host)names that job is available for.",
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        ]
+                      },
                       "name": {
                         "description": "The (display) name of the job.",
                         "type": "string"
+                      },
+                      "platforms": {
+                        "oneOf": [
+                          {
+                            "type": "string",
+                            "description": "The name of the platform the job is for."
+                          },
+                          {
+                            "type": "array",
+                            "description": "One or more platform names the job is for.",
+                            "items": {
+                              "type": "string",
+                              "description": "The name of platform the job is for."
+                            }
+                          }
+                        ]
                       },
                       "runParallel": {
                         "description": "Indicates if this job can ran parallel to another or not.",
