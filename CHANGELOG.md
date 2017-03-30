@@ -1,5 +1,9 @@
 # Change Log (vs-cron)
 
+## 1.5.0 (March 30th, 2017; filters)
+
+* added `if`, `isFor` and `platforms` settings, that can define when a job is availble on a machine / system
+
 ## 1.4.0 (February 20th, 2017; deploy files)
 
 * added [deploy](https://mkloubert.github.io/vs-cron/interfaces/_contracts_.jobscriptmoduleexecutorarguments.html#deploy) method to [JobScriptModuleExecutorArguments](https://mkloubert.github.io/vs-cron/interfaces/_contracts_.jobscriptmoduleexecutorarguments.html) which make use of `extension.deploy.filesTo` command, provided by [vs-deploy](https://github.com/mkloubert/vs-deploy) extension

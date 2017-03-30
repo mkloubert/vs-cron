@@ -29,6 +29,7 @@ import * as cj_contracts from './contracts';
 import * as cj_helpers from './helpers';
 import * as cj_objects from './objects';
 import * as Moment from 'moment';
+import * as OS from 'os';
 import * as vscode from 'vscode';
 
 
@@ -108,6 +109,74 @@ export class Controller implements vscode.Disposable {
     }
 
     /**
+     * Returns the list of job entries.
+     * 
+     * @return {cj_contracts.Job[]} The job entries.
+     */
+    public getJobEntries(): cj_contracts.Job[] {
+        let me = this;
+
+        let jobs: cj_contracts.Job[];
+
+        let cfg = this.config;
+        if (cfg) {
+            jobs = cj_helpers.asArray(cfg.jobs)
+                             .filter(x => x);
+
+            // if
+            jobs = jobs.filter(j => {
+                try {
+                    let conditions = cj_helpers.asArray(j.if)
+                                               .filter(x => !cj_helpers.isEmptyString(x));
+
+                    for (let i = 0; i < conditions.length; i++) {
+                        let $cwd = process.cwd();
+                        let $homeDir = OS.homedir();
+                        let $require = function(id: string) {
+                            return require(cj_helpers.toStringSafe(id));
+                        };
+                        let $workspaceRoot = vscode.workspace.rootPath;
+
+                        if (!cj_helpers.toBooleanSafe(eval(conditions[i]))) {
+                            return false;  // at least one condition does NOT match
+                        }
+                    }
+                }
+                catch (e) {
+                    me.log(`[ERROR] Controller.getJobEntries().if: ${cj_helpers.toStringSafe(e)}`);
+                    return false;
+                }
+
+                return true;
+            });
+
+            // isFor
+            let myName = this.name;
+            jobs = jobs.filter(j => {
+                let isFor = cj_helpers.asArray(j.isFor)
+                                      .map(x => cj_helpers.normalizeString(x))
+                                      .filter(x => '' !== x);
+
+                return isFor.length < 1 ? true
+                                        : isFor.indexOf(myName) > -1;
+            });
+
+            // platforms
+            let myPlatform = cj_helpers.normalizeString(process.platform);
+            jobs = jobs.filter(j => {
+                let platforms = cj_helpers.asArray(j.platforms)
+                                          .map(x => cj_helpers.normalizeString(x))
+                                          .filter(x => '' !== x);
+
+                return platforms.length < 1 ? true
+                                            : platforms.indexOf(myPlatform) > -1;
+            });
+        }
+
+        return jobs;
+    }
+
+    /**
      * Returns a copy of the list of job job schedulers.
      * 
      * @returns {cj_contracts.JobScheduler[]} The list of schedulers.
@@ -144,6 +213,13 @@ export class Controller implements vscode.Disposable {
             .appendLine(`[${now.format('YYYY-MM-DD HH:mm:ss')}] ${cj_helpers.toStringSafe(msg)}`);
 
         return this;
+    }
+
+    /**
+     * Get the name that represents that machine.
+     */
+    public get name(): string {
+        return cj_helpers.normalizeString(OS.hostname());
     }
 
     /**
@@ -218,10 +294,7 @@ export class Controller implements vscode.Disposable {
         let cfg = me.config;
         me._globalScriptStates = {};
 
-        let jobs = cj_helpers.asArray(cfg.jobs)
-                             .filter(x => x);
-
-        jobs.forEach(x => {
+        me.getJobEntries().forEach(x => {
             let newJob = new cj_objects.ConfigJob(x, me);
             newJobList.push(newJob);
 

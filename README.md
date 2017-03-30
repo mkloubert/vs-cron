@@ -84,9 +84,12 @@ Add a `cron.jobs` section:
 | `autoStart` | Run on startup or not. Default: `(false)` |
 | `description` | The description for the job. |
 | `format` | The format to use. Can be `crontab` or `date`. Default: `crontab` |
+| `if` | One or more conditions (as JavaScript code) that defines if job is available or not. |
+| `isFor` | An optional list of one or more (host)names that job is available for. |
 | `maximum` | The maximum number of executions. |
 | `minimum` | The minimum number of ticks before the job does its first action. |
 | `name` | The (display) name of the job. |
+| `platforms` | One or more platform names the job is for. s. [process.platform](https://nodejs.org/api/process.html#process_process_platform) |
 | `runParallel` | Indicates if this job can be run parallel to another or not. Default: `(false)` |
 | `startDelay` | The start delay in milliseconds. |
 | `time` | The time value that is used to configure the job. For `crontab` format, s. [cron module](https://www.npmjs.com/package/cron) |

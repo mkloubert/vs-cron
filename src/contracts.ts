@@ -28,6 +28,16 @@ import * as vscode from 'vscode';
 
 
 /**
+ * An item that uses JavaScript code if it is available or not.
+ */
+export interface ConditionalItem {
+    /**
+     * One or more (JavaScript) conditions that check if that item is available or not.
+     */
+    if?: string | string[];
+}
+
+/**
  * App settings
  */
 export interface Configuration {
@@ -78,7 +88,7 @@ export interface Document {
 /**
  * Settings for a job.
  */
-export interface Job {
+export interface Job extends ConditionalItem, MachineItem, PlatformItem {
     /**
      * [ONLY FOR INTERNAL USE]
      * 
@@ -415,6 +425,16 @@ export interface JobScriptModuleExecutorArguments extends ScriptArguments {
 }
 
 /**
+ * An item for a specific machine.
+ */
+export interface MachineItem {
+    /**
+     * A list of one or more (host)names that item is (visible) for.
+     */
+    isFor?: string | string[];
+}
+
+/**
  * Describes the structure of the package file of that extenstion.
  */
 export interface PackageFile {
@@ -430,6 +450,16 @@ export interface PackageFile {
      * The version string.
      */
     version: string;
+}
+
+/**
+ * An item / object that can be filtered by platform.
+ */
+export interface PlatformItem {
+    /**
+     * One or more platform the item is for.
+     */
+    platforms?: string | string[];
 }
 
 /**
