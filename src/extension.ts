@@ -29,6 +29,7 @@ import * as cj_content from './content';
 import * as cj_controller from './controller';
 import * as cj_contracts from './contracts';
 import * as cj_helpers from './helpers';
+import * as cj_workspace from './workspace';
 import * as FS from 'fs';
 import * as Moment from 'moment';
 import * as Path from 'path';
@@ -68,6 +69,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     controller = new cj_controller.Controller(context, outputChannel, pkgFile);
+    cj_workspace.resetSelectedWorkspaceFolder();
 
     let showPopupMessage = (popupMsg: string, popupAction: (m: string) => Thenable<string>) => {
         popupMsg = cj_helpers.toStringSafe(popupMsg).trim();
