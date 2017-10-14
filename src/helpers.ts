@@ -26,6 +26,7 @@
 import * as ChildProcess from 'child_process';
 import * as cj_contracts from './contracts';
 import * as cj_objects from './objects';
+import * as cj_workspace from './workspace';
 import * as FS from 'fs';
 import * as Moment from 'moment';
 import * as Path from 'path';
@@ -237,7 +238,7 @@ export function isNullOrUndefined(val: any): boolean {
  */
 export function loadModuleSync<TModule extends cj_contracts.ScriptModule>(file: string, useCache: boolean = false): TModule {
     if (!Path.isAbsolute(file)) {
-        file = Path.join(vscode.workspace.rootPath, file);
+        file = Path.join(cj_workspace.getRootPath(), file);
     }
     file = Path.resolve(file);
 
@@ -302,7 +303,7 @@ export function open(target: string, opts?: OpenOptions): PromiseLike<ChildProce
             let appArgs: string[] = [];
             let args: string[] = [];
             let cpOpts: ChildProcess.SpawnOptions = {
-                cwd: opts.cwd || vscode.workspace.rootPath,
+                cwd: opts.cwd || cj_workspace.getRootPath(),
             };
 
             if (Array.isArray(opts.app)) {

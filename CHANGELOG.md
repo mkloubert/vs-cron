@@ -1,5 +1,9 @@
 # Change Log (vs-cron)
 
+## 2.0.0 (October 14th, 2017; multi root support)
+
+* started to refactor to new, upcoming [Multi Root Workspace API](https://github.com/Microsoft/vscode/wiki/Extension-Authoring:-Adopting-Multi-Root-Workspace-APIs)
+
 ## 1.5.0 (March 30th, 2017; filters)
 
 * added `if`, `isFor` and `platforms` settings, that can define when a job is availble on a machine / system

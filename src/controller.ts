@@ -28,6 +28,7 @@
 import * as cj_contracts from './contracts';
 import * as cj_helpers from './helpers';
 import * as cj_objects from './objects';
+import * as cj_workspace from './workspace';
 import * as Moment from 'moment';
 import * as OS from 'os';
 import * as vscode from 'vscode';
@@ -135,7 +136,7 @@ export class Controller implements vscode.Disposable {
                         let $require = function(id: string) {
                             return require(cj_helpers.toStringSafe(id));
                         };
-                        let $workspaceRoot = vscode.workspace.rootPath;
+                        let $workspaceRoot = cj_workspace.getRootPath();
 
                         if (!cj_helpers.toBooleanSafe(eval(conditions[i]))) {
                             return false;  // at least one condition does NOT match
