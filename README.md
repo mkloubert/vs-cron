@@ -1,4 +1,4 @@
-# vs-cron
+# [DEPRECATED] vs-cron
 
 [![Latest Release](https://vsmarketplacebadge.apphb.com/version-short/mkloubert.vs-cron.svg)](https://marketplace.visualstudio.com/items?itemName=mkloubert.vs-cron)
 [![Installs](https://vsmarketplacebadge.apphb.com/installs/mkloubert.vs-cron.svg)](https://marketplace.visualstudio.com/items?itemName=mkloubert.vs-cron)
@@ -6,7 +6,15 @@
 
 [Visual Studio Code](https://code.visualstudio.com/) (VS Code) extension that runs tasks periodically.
 
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=W833F9G7EGBNY) [![](https://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?fid=o62pkd&url=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fvs-cron)
+<br />
+
+**The extension is now marked as DEPRECATED ... it is RECOMMENDED to use [vscode-powertools](https://marketplace.visualstudio.com/items?itemName=ego-digital.vscode-powertools) by [e.GO Digital](https://github.com/egodigital).**
+
+If you have suggestions and other kind of issues for that new extension, feel free to [open an issue here](https://github.com/egodigital/vscode-powertools/issues).
+
+<br />
+
+## Table of contents
 
 1. [Install](#install-)
 2. [How to use](#how-to-use-)

@@ -1,4 +1,9 @@
-# Change Log (vs-cron)
+# [DEPRECATED] Change Log (vs-cron)
+
+## 3.0.0 (January 9th, 2019; FINAL VERSION => DEPRECATED)
+
+* **the extension is now marked as DEPRECATED ... it is RECOMMENDED to use [vscode-powertools](https://marketplace.visualstudio.com/items?itemName=ego-digital.vscode-powertools) by [e.GO Digital](https://github.com/egodigital)**
+* if you have suggestions and other kind of issues for that new extension, feel free to [open an issue here](https://github.com/egodigital/vscode-powertools/issues)
 
 ## 2.0.1 (October 14th, 2017; multi root support)
 
